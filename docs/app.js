@@ -19,12 +19,16 @@ document.addEventListener('DOMContentLoaded', function() {
 function setupEventListeners() {
     // Stock form
     document.getElementById('stockForm').addEventListener('submit', handleStockSubmit);
-    
+
     // Sales form
     document.getElementById('salesForm').addEventListener('submit', handleSalesSubmit);
-    
+
     // Product select change
     document.getElementById('productSelect').addEventListener('change', handleProductSelect);
+
+    // Auto-calculate total amount when quantity or unit price changes
+    document.getElementById('quantitySold').addEventListener('input', calculateTotalAmount);
+    document.getElementById('unitPrice').addEventListener('input', calculateTotalAmount);
 }
 
 // Tab switching with enhanced animations
@@ -133,6 +137,15 @@ async function handleStockSubmit(e) {
     }
 }
 
+// Calculate total amount automatically
+function calculateTotalAmount() {
+    const quantity = parseFloat(document.getElementById('quantitySold').value) || 0;
+    const unitPrice = parseFloat(document.getElementById('unitPrice').value) || 0;
+    const totalAmount = quantity * unitPrice;
+
+    document.getElementById('totalAmount').value = totalAmount.toFixed(2);
+}
+
 // Handle sales form submission
 async function handleSalesSubmit(e) {
     e.preventDefault();
@@ -149,12 +162,15 @@ async function handleSalesSubmit(e) {
         return;
     }
     
+    const unitPrice = parseFloat(document.getElementById('unitPrice').value);
+    const totalAmount = unitPrice * quantitySold;
+
     const formData = {
         product_name: selectedStock.product_name,
         company_name: selectedStock.company_name,
         quantity_sold: quantitySold,
         customer_name: document.getElementById('customerName').value,
-        sale_amount: parseFloat(document.getElementById('saleAmount').value)
+        unit_price: unitPrice
     };
     
     try {

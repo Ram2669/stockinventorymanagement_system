@@ -158,13 +158,19 @@ def record_sale():
     if stock.quantity < int(data['quantity_sold']):
         return jsonify({"error": "Insufficient stock"}), 400
 
+    # Calculate total amount from unit price and quantity
+    unit_price = float(data['unit_price'])
+    quantity_sold = int(data['quantity_sold'])
+    total_amount = unit_price * quantity_sold
+
     # Record the sale
     new_sale = Sale(
         product_name=data['product_name'],
         company_name=data['company_name'],
-        quantity_sold=int(data['quantity_sold']),
+        quantity_sold=quantity_sold,
         customer_name=data['customer_name'],
-        sale_amount=float(data['sale_amount'])
+        unit_price=unit_price,
+        sale_amount=total_amount
     )
 
     # Update stock quantity
