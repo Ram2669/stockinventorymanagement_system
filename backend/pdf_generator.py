@@ -61,24 +61,25 @@ class PDFGenerator:
             story.append(Spacer(1, 10))
             
             # Table data
-            data = [['Date', 'Product Name', 'Company', 'Quantity', 'Amount (₹)']]
+            data = [['Date', 'Product Name', 'Company', 'Qty', 'Unit Price', 'Amount (₹)']]
             total_amount = 0
-            
+
             for sale in customer_sale_list:
                 data.append([
                     sale.sale_date.strftime('%Y-%m-%d'),
                     sale.product_name,
                     sale.company_name,
                     str(sale.quantity_sold),
+                    f"₹{sale.unit_price:.2f}",
                     f"₹{sale.sale_amount:.2f}"
                 ])
                 total_amount += sale.sale_amount
-            
+
             # Add total row
-            data.append(['', '', '', 'Total:', f"₹{total_amount:.2f}"])
-            
+            data.append(['', '', '', '', 'Total:', f"₹{total_amount:.2f}"])
+
             # Create table
-            table = Table(data, colWidths=[1.2*inch, 2*inch, 1.5*inch, 1*inch, 1.3*inch])
+            table = Table(data, colWidths=[1*inch, 1.8*inch, 1.2*inch, 0.6*inch, 1*inch, 1.4*inch])
             table.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
@@ -141,24 +142,25 @@ class PDFGenerator:
             story.append(Spacer(1, 10))
             
             # Table data
-            data = [['Customer Name', 'Product Name', 'Company', 'Quantity', 'Amount (₹)']]
+            data = [['Customer Name', 'Product Name', 'Company', 'Qty', 'Unit Price', 'Amount (₹)']]
             total_amount = 0
-            
+
             for sale in date_sale_list:
                 data.append([
                     sale.customer_name,
                     sale.product_name,
                     sale.company_name,
                     str(sale.quantity_sold),
+                    f"₹{sale.unit_price:.2f}",
                     f"₹{sale.sale_amount:.2f}"
                 ])
                 total_amount += sale.sale_amount
-            
+
             # Add total row
-            data.append(['', '', '', 'Total:', f"₹{total_amount:.2f}"])
-            
+            data.append(['', '', '', '', 'Total:', f"₹{total_amount:.2f}"])
+
             # Create table
-            table = Table(data, colWidths=[1.5*inch, 2*inch, 1.5*inch, 1*inch, 1*inch])
+            table = Table(data, colWidths=[1.3*inch, 1.7*inch, 1.2*inch, 0.6*inch, 1*inch, 1.2*inch])
             table.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
