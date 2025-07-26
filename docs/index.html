@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRI LAKSHMI ENTERPRISES</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.js"></script>
+    <script src="config.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌾 SRI LAKSHMI ENTERPRISES 🌾</h1>
+            <p>Agricultural Stock Management System</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('dashboard')">
+                <i class="fas fa-tractor"></i> Farm Dashboard
+            </button>
+            <button class="nav-tab" onclick="showTab('search')">
+                <i class="fas fa-search"></i> Find Products
+            </button>
+            <button class="nav-tab" onclick="showTab('stock')">
+                <i class="fas fa-seedling"></i> Manage Inventory
+            </button>
+            <button class="nav-tab" onclick="showTab('sales')">
+                <i class="fas fa-handshake"></i> Record Sales
+            </button>
+            <button class="nav-tab" onclick="showTab('reports')">
+                <i class="fas fa-clipboard-list"></i> Farm Reports
+            </button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 id="totalProducts">0</h3>
+                    <p>Total Products</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalStock">0</h3>
+                    <p>Total Stock Quantity</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalSales">0</h3>
+                    <p>Total Sales</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalRevenue">₹0.00</h3>
+                    <p>Total Revenue</p>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="card">
+                    <h2>Recent Sales</h2>
+                    <div id="recentSales">No recent sales</div>
+                </div>
+                <div class="card">
+                    <h2>Low Stock Alert</h2>
+                    <div id="lowStock">All products have sufficient stock</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Search Tab -->
+        <div id="search" class="tab-content">
+            <div class="card">
+                <h2><i class="fas fa-search"></i> 🌱 Product Search</h2>
+                <div class="search-container">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Search by product name, company, or any keyword..." 
+                               oninput="performSearch()" autocomplete="off">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                    <div class="search-filters">
+                        <select id="searchFilter" onchange="performSearch()">
+                            <option value="all">All Products</option>
+                            <option value="in-stock">In Stock Only</option>
+                            <option value="low-stock">Low Stock (< 10)</option>
+                            <option value="out-of-stock">Out of Stock</option>
+                        </select>
+                        <select id="sortBy" onchange="performSearch()">
+                            <option value="name">Sort by Name</option>
+                            <option value="company">Sort by Company</option>
+                            <option value="quantity">Sort by Quantity</option>
+                            <option value="date">Sort by Date Added</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="searchResults">
+                    <div class="search-stats">
+                        <span id="searchCount">0 products found</span>
+                        <button class="btn btn-primary" onclick="clearSearch()">
+                            <i class="fas fa-times"></i> Clear Search
+                        </button>
+                    </div>
+                    <div id="searchResultsList">
+                        <!-- Search results will be displayed here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Search Suggestions -->
+            <div class="card">
+                <h2><i class="fas fa-lightbulb"></i> 🚜 Quick Search</h2>
+                <div class="quick-search-buttons">
+                    <button class="btn btn-primary" onclick="quickSearch('low-stock')">
+                        <i class="fas fa-exclamation-triangle"></i> Low Stock Items
+                    </button>
+                    <button class="btn btn-success" onclick="quickSearch('high-stock')">
+                        <i class="fas fa-chart-line"></i> High Stock Items
+                    </button>
+                    <button class="btn btn-danger" onclick="quickSearch('out-of-stock')">
+                        <i class="fas fa-times-circle"></i> Out of Stock
+                    </button>
+                    <button class="btn btn-receipt" onclick="quickSearch('recent')">
+                        <i class="fas fa-clock"></i> Recently Added
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Management Tab -->
+        <div id="stock" class="tab-content">
+            <div class="card">
+                <h2><i class="fas fa-plus-circle"></i> 🌾 Add New Stock</h2>
+                <form id="stockForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Product Name</label>
+                            <input type="text" id="productName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Company Name</label>
+                            <input type="text" id="companyName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <input type="number" id="quantity" min="1" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Stock
+                    </button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-warehouse"></i> 📦 Current Inventory</h2>
+                <div class="search-box-small">
+                    <input type="text" id="stockSearchInput" placeholder="Search current stock..." 
+                           oninput="searchStock()" autocomplete="off">
+                    <i class="fas fa-search search-icon-small"></i>
+                </div>
+                <div id="stockList">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Sales Management Tab -->
+        <div id="sales" class="tab-content">
+            <div class="card">
+                <h2>Record New Sale</h2>
+                <form id="salesForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Select Product</label>
+                            <select id="productSelect" required>
+                                <option value="">Select a product...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Customer Name</label>
+                            <input type="text" id="customerName" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Quantity to Sell</label>
+                            <input type="number" id="quantitySold" min="1" required>
+                            <small id="availableQty"></small>
+                        </div>
+                        <div class="form-group">
+                            <label>Sale Amount (₹)</label>
+                            <input type="number" id="saleAmount" min="0" step="0.01" required>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-cash-register"></i> Record Sale
+                    </button>
+                </form>
+            </div>
+
+            <div id="selectedProductInfo" class="card" style="display: none; background-color: #f0fff4;">
+                <h3>Selected Product Details</h3>
+                <div id="productDetails"></div>
+            </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reports" class="tab-content">
+            <div class="card">
+                <h2>Weekly Reports</h2>
+                
+                <div class="stats-grid" style="margin-bottom: 30px;">
+                    <div class="stat-card">
+                        <h3 id="weeklySalesCount">0</h3>
+                        <p>Sales This Week</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="weeklyRevenue">₹0.00</h3>
+                        <p>Revenue This Week</p>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3>Download PDF Reports</h3>
+                    <button class="btn btn-primary" onclick="downloadReport('customer')" style="margin-right: 15px;">
+                        Download Report by Customer
+                    </button>
+                    <button class="btn btn-success" onclick="downloadReport('date')">
+                        Download Report by Date
+                    </button>
+                </div>
+
+                <div>
+                    <h3>Weekly Sales Summary</h3>
+                    <div id="weeklySalesList">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sale Success Modal -->
+    <div id="saleSuccessModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-check-circle"></i> Sale Recorded Successfully!</h2>
+                <span class="close" onclick="closeSaleModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="success-animation">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <p>Your sale has been recorded successfully.</p>
+                <div id="saleDetails"></div>
+                <div class="modal-actions">
+                    <button class="btn btn-receipt" onclick="downloadReceipt()">
+                        <i class="fas fa-receipt"></i> Download Receipt
+                    </button>
+                    <button class="btn btn-primary" onclick="closeSaleModal()">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
