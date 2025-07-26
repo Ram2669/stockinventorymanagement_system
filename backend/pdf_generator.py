@@ -61,7 +61,7 @@ class PDFGenerator:
             story.append(Spacer(1, 10))
             
             # Table data
-            data = [['Date', 'Product Name', 'Company', 'Qty', 'Unit Price', 'Amount (₹)']]
+            data = [['Date', 'Product Name', 'Company', 'Qty', 'Unit Price', 'Amount (Rs.)']]
             total_amount = 0
 
             for sale in customer_sale_list:
@@ -70,13 +70,13 @@ class PDFGenerator:
                     sale.product_name,
                     sale.company_name,
                     str(sale.quantity_sold),
-                    f"₹{sale.unit_price:.2f}",
-                    f"₹{sale.sale_amount:.2f}"
+                    f"Rs.{sale.unit_price:.2f}",
+                    f"Rs.{sale.sale_amount:.2f}"
                 ])
                 total_amount += sale.sale_amount
 
             # Add total row
-            data.append(['', '', '', '', 'Total:', f"₹{total_amount:.2f}"])
+            data.append(['', '', '', '', 'Total:', f"Rs.{total_amount:.2f}"])
 
             # Create table
             table = Table(data, colWidths=[1*inch, 1.8*inch, 1.2*inch, 0.6*inch, 1*inch, 1.4*inch])
@@ -142,7 +142,7 @@ class PDFGenerator:
             story.append(Spacer(1, 10))
             
             # Table data
-            data = [['Customer Name', 'Product Name', 'Company', 'Qty', 'Unit Price', 'Amount (₹)']]
+            data = [['Customer Name', 'Product Name', 'Company', 'Qty', 'Unit Price', 'Amount (Rs.)']]
             total_amount = 0
 
             for sale in date_sale_list:
@@ -151,13 +151,13 @@ class PDFGenerator:
                     sale.product_name,
                     sale.company_name,
                     str(sale.quantity_sold),
-                    f"₹{sale.unit_price:.2f}",
-                    f"₹{sale.sale_amount:.2f}"
+                    f"Rs.{sale.unit_price:.2f}",
+                    f"Rs.{sale.sale_amount:.2f}"
                 ])
                 total_amount += sale.sale_amount
 
             # Add total row
-            data.append(['', '', '', '', 'Total:', f"₹{total_amount:.2f}"])
+            data.append(['', '', '', '', 'Total:', f"Rs.{total_amount:.2f}"])
 
             # Create table
             table = Table(data, colWidths=[1.3*inch, 1.7*inch, 1.2*inch, 0.6*inch, 1*inch, 1.2*inch])
@@ -244,8 +244,8 @@ class PDFGenerator:
                 sale_data['product_name'],
                 sale_data['company_name'],
                 str(sale_data['quantity_sold']),
-                f"₹{sale_data['unit_price']:.2f}",
-                f"₹{sale_data['sale_amount']:.2f}"
+                f"Rs.{sale_data['unit_price']:.2f}",
+                f"Rs.{sale_data['sale_amount']:.2f}"
             ]
         ]
 
@@ -275,7 +275,7 @@ class PDFGenerator:
 
         # Total section
         total_data = [
-            ['', '', '', 'TOTAL:', f"₹{sale_data['sale_amount']:.2f}"]
+            ['', '', '', 'TOTAL:', f"Rs.{sale_data['sale_amount']:.2f}"]
         ]
 
         total_table = Table(total_data, colWidths=[2.5*inch, 1.5*inch, 0.8*inch, 1*inch, 1.2*inch])
