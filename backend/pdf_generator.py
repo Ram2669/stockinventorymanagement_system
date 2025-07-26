@@ -237,12 +237,12 @@ class PDFGenerator:
 
         # Items table
         items_data = [
-            ['Item Description', 'Company', 'Qty', 'Rate', 'Amount'],
+            ['Item Description', 'Company', 'Qty', 'Unit Price', 'Amount'],
             [
                 sale_data['product_name'],
                 sale_data['company_name'],
                 str(sale_data['quantity_sold']),
-                f"₹{(sale_data['sale_amount'] / sale_data['quantity_sold']):.2f}",
+                f"₹{sale_data['unit_price']:.2f}",
                 f"₹{sale_data['sale_amount']:.2f}"
             ]
         ]

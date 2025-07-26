@@ -238,6 +238,7 @@ def generate_receipt(sale_id):
         'company_name': sale.company_name,
         'quantity_sold': sale.quantity_sold,
         'customer_name': sale.customer_name,
+        'unit_price': sale.unit_price,
         'sale_amount': sale.sale_amount,
         'sale_date': sale.sale_date.strftime('%Y-%m-%d %H:%M:%S')
     }

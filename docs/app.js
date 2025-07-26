@@ -394,13 +394,17 @@ function showSaleSuccessModal(saleData) {
     const modal = document.getElementById('saleSuccessModal');
     const saleDetails = document.getElementById('saleDetails');
 
+    // Calculate total amount from unit price and quantity
+    const totalAmount = (saleData.unit_price * saleData.quantity_sold).toFixed(2);
+
     saleDetails.innerHTML = `
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left;">
             <div><strong>Customer:</strong> ${saleData.customer_name}</div>
             <div><strong>Product:</strong> ${saleData.product_name}</div>
             <div><strong>Company:</strong> ${saleData.company_name}</div>
             <div><strong>Quantity:</strong> ${saleData.quantity_sold}</div>
-            <div style="grid-column: 1 / -1;"><strong>Amount:</strong> ₹${saleData.sale_amount}</div>
+            <div><strong>Unit Price:</strong> ₹${saleData.unit_price}</div>
+            <div style="grid-column: 1 / -1; font-size: 1.1em; color: #28a745;"><strong>Total Amount:</strong> ₹${totalAmount}</div>
         </div>
     `;
 
