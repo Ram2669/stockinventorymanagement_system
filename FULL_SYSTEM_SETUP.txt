@@ -199,17 +199,23 @@ file:///path/to/your/project/frontend_simple/index.html
 # Replace "path/to/your/project" with actual path
 
 ================================================================================
-🌐 STEP 9: GITHUB PAGES DEPLOYMENT (OPTIONAL)
+🌐 STEP 9: GITHUB PAGES DEPLOYMENT (RECOMMENDED)
 ================================================================================
+
+GitHub Pages allows you to host the frontend globally for free while keeping
+your backend and database secure on your local machine.
 
 ### Create GitHub Repository:
 1. Go to https://github.com
-2. Click "New repository"
-3. Name: stockinventorymanagement_system
-4. Make it PUBLIC
-5. Click "Create repository"
+2. Click "New repository" (+ button in top right)
+3. Repository details:
+   - Name: stockinventorymanagement_system
+   - Description: SRI LAKSHMI ENTERPRISES Stock Management System
+   - Visibility: PUBLIC (required for free GitHub Pages)
+   - DO NOT initialize with README (we have files already)
+4. Click "Create repository"
 
-### Push Your Code:
+### Push Your Code to GitHub:
 git add .
 git commit -m "Initial setup of SRI LAKSHMI ENTERPRISES system"
 git branch -M main
@@ -217,15 +223,44 @@ git remote add origin https://github.com/YOUR_USERNAME/stockinventorymanagement_
 git push -u origin main
 
 ### Enable GitHub Pages:
-1. Go to repository Settings
-2. Click "Pages" in left sidebar
-3. Source: "Deploy from a branch"
-4. Branch: "main"
-5. Folder: "/docs"
-6. Click "Save"
+1. Go to your repository: https://github.com/YOUR_USERNAME/stockinventorymanagement_system
+2. Click "Settings" tab (top right of repository page)
+3. Scroll down and click "Pages" in left sidebar (under "Code and automation")
+4. Configure Pages:
+   - Source: "Deploy from a branch"
+   - Branch: "main"
+   - Folder: "/docs" (IMPORTANT: Must select /docs folder)
+5. Click "Save"
+6. Wait 5-10 minutes for deployment
 
-# Your site will be live at:
-# https://YOUR_USERNAME.github.io/stockinventorymanagement_system
+### Your Website URLs:
+- Repository: https://github.com/YOUR_USERNAME/stockinventorymanagement_system
+- Live Website: https://YOUR_USERNAME.github.io/stockinventorymanagement_system
+
+### Update API Configuration for GitHub Pages:
+Edit docs/config.js file:
+PRODUCTION_API_URL: 'http://YOUR_LOCAL_IP:5001/api',
+
+Replace YOUR_LOCAL_IP with your actual IP address from Step 6.
+
+### How GitHub Pages Works:
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   GitHub Pages  │───▶│  Your Local API  │───▶│   PostgreSQL    │
+│   (Frontend)    │    │   (Backend)      │    │   (Database)    │
+│                 │    │                  │    │                 │
+│ • Global Access │    │ • Local Machine  │    │ • Local Storage │
+│ • Free Hosting  │    │ • Port 5001      │    │ • Secure Data   │
+│ • Beautiful UI  │    │ • API Endpoints  │    │ • Fast Queries  │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+
+### Benefits of GitHub Pages Deployment:
+✅ FREE hosting for frontend
+✅ Global accessibility (anyone can access your site)
+✅ Professional web presence
+✅ Automatic updates when you push code changes
+✅ HTTPS security
+✅ Fast loading with CDN
+✅ Data stays secure on your local machine
 
 ================================================================================
 🔧 AUTOMATED SETUP SCRIPTS
@@ -316,14 +351,65 @@ psql -U sri_lakshmi_user -d sri_lakshmi_db -h localhost
 # Should connect successfully
 
 ================================================================================
-📱 MOBILE ACCESS
+🌐 STEP 10: ACCESSING FROM OTHER SYSTEMS & DEVICES
 ================================================================================
 
-### Access from Mobile Devices:
-1. Make sure your backend server is running
-2. Find your computer's IP address (Step 6)
-3. On mobile browser, go to: http://YOUR_IP:5001
-4. GitHub Pages site works on mobile: https://YOUR_USERNAME.github.io/stockinventorymanagement_system
+Once your system is set up, you can access it from multiple devices and locations.
+
+### Access Methods:
+
+#### Method 1: GitHub Pages (Recommended)
+- URL: https://YOUR_USERNAME.github.io/stockinventorymanagement_system
+- Works from: Anywhere in the world with internet
+- Requirements: Your local backend server must be running
+- Benefits: Professional URL, HTTPS security, fast loading
+
+#### Method 2: Direct Local Access
+- URL: http://YOUR_LOCAL_IP:5001
+- Works from: Same network as your computer
+- Requirements: Backend server running, firewall configured
+- Benefits: Direct connection, no GitHub dependency
+
+#### Method 3: Local File Access
+- URL: file:///path/to/frontend_simple/index.html
+- Works from: Same computer only
+- Requirements: Backend server running locally
+- Benefits: No network dependency
+
+### Setting Up Access from Other Computers:
+
+#### Step 1: Configure Your Main Computer
+1. Start your backend server: python app.py
+2. Note your IP address from Step 6 setup
+3. Configure firewall to allow port 5001:
+   - Windows: Windows Defender Firewall → Allow app
+   - macOS: System Preferences → Security & Privacy → Firewall
+   - Linux: sudo ufw allow 5001
+
+#### Step 2: Access from Other Devices
+1. Connect devices to same network as your main computer
+2. Open web browser on the other device
+3. Go to: https://YOUR_USERNAME.github.io/stockinventorymanagement_system
+4. The site will automatically connect to your local backend
+
+### Mobile Device Access:
+- Use GitHub Pages URL for best experience
+- All features work on mobile browsers
+- Touch-friendly interface
+- PDF downloads work on mobile
+
+### Network Configuration:
+- Main computer: Runs backend server (192.168.1.29:5001)
+- Other devices: Access via GitHub Pages URL
+- Data flow: GitHub Pages → Your Local API → PostgreSQL
+- Security: Database never leaves your local network
+
+### Troubleshooting Network Access:
+1. Verify backend server is running: curl http://localhost:5001/
+2. Check firewall settings allow port 5001
+3. Confirm IP address hasn't changed
+4. Test local access first, then remote access
+5. Check network connectivity between devices
 
 ================================================================================
 🔒 SECURITY NOTES
