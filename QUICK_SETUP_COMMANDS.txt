@@ -1,0 +1,203 @@
+================================================================================
+🚀 SRI LAKSHMI ENTERPRISES - QUICK SETUP COMMANDS
+================================================================================
+
+Copy and paste these commands to set up the system quickly on any new computer.
+
+================================================================================
+📥 1. DOWNLOAD PROJECT
+================================================================================
+
+git clone https://github.com/Ram2669/stockinventorymanagement_system.git
+cd stockinventorymanagement_system
+
+================================================================================
+🗄️ 2. POSTGRESQL SETUP (Choose Your OS)
+================================================================================
+
+### WINDOWS (Command Prompt as Administrator):
+psql -U postgres
+CREATE USER sri_lakshmi_user WITH PASSWORD 'your_secure_password';
+CREATE DATABASE sri_lakshmi_db OWNER sri_lakshmi_user;
+GRANT ALL PRIVILEGES ON DATABASE sri_lakshmi_db TO sri_lakshmi_user;
+ALTER USER sri_lakshmi_user CREATEDB;
+\q
+
+### LINUX/UBUNTU:
+sudo -u postgres psql
+CREATE USER sri_lakshmi_user WITH PASSWORD 'your_secure_password';
+CREATE DATABASE sri_lakshmi_db OWNER sri_lakshmi_user;
+GRANT ALL PRIVILEGES ON DATABASE sri_lakshmi_db TO sri_lakshmi_user;
+ALTER USER sri_lakshmi_user CREATEDB;
+\q
+
+### macOS:
+psql postgres
+CREATE USER sri_lakshmi_user WITH PASSWORD 'your_secure_password';
+CREATE DATABASE sri_lakshmi_db OWNER sri_lakshmi_user;
+GRANT ALL PRIVILEGES ON DATABASE sri_lakshmi_db TO sri_lakshmi_user;
+ALTER USER sri_lakshmi_user CREATEDB;
+\q
+
+================================================================================
+🐍 3. PYTHON SETUP
+================================================================================
+
+# Create and activate virtual environment
+python -m venv venv
+
+# WINDOWS:
+venv\Scripts\activate
+
+# macOS/LINUX:
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# If psycopg2 fails, try:
+pip install psycopg2-binary
+
+================================================================================
+⚙️ 4. CONFIGURATION
+================================================================================
+
+# Copy environment file
+cp backend/.env.example backend/.env
+
+# Edit backend/.env with your database password:
+# POSTGRES_PASSWORD=your_secure_password
+
+# Find your IP address:
+# WINDOWS:
+ipconfig
+
+# macOS/LINUX:
+ifconfig | grep "inet " | grep -v 127.0.0.1
+
+# Update frontend_simple/config.js and docs/config.js:
+# Replace YOUR_LOCAL_IP with your actual IP address
+
+================================================================================
+🗄️ 5. DATABASE INITIALIZATION
+================================================================================
+
+cd backend
+python init_db.py
+cd ..
+
+================================================================================
+🚀 6. START THE SYSTEM
+================================================================================
+
+# Start backend server
+cd backend
+python app.py
+
+# In new terminal, test API:
+curl http://localhost:5001/
+
+# Open frontend in browser:
+# file:///path/to/your/project/frontend_simple/index.html
+
+================================================================================
+🌐 7. GITHUB PAGES (OPTIONAL)
+================================================================================
+
+# Push to GitHub
+git add .
+git commit -m "Initial setup"
+git remote add origin https://github.com/YOUR_USERNAME/stockinventorymanagement_system.git
+git push -u origin main
+
+# Enable GitHub Pages:
+# Go to repository Settings → Pages
+# Source: main branch, /docs folder
+
+================================================================================
+🔧 8. AUTOMATED SCRIPTS (ALTERNATIVE)
+================================================================================
+
+### WINDOWS:
+setup_windows.bat
+setup_database_windows.bat
+start_server_windows.bat
+
+### LINUX:
+chmod +x *.sh
+./setup_linux.sh
+./setup_database_linux.sh
+./start_server_linux.sh
+
+### macOS:
+chmod +x *.sh
+./setup_database.sh
+./quick_start.sh
+
+================================================================================
+✅ VERIFICATION COMMANDS
+================================================================================
+
+# Test database connection:
+psql -U sri_lakshmi_user -d sri_lakshmi_db -h localhost
+
+# Test API endpoints:
+curl http://localhost:5001/
+curl http://localhost:5001/api/stock
+curl http://localhost:5001/api/sales
+
+# Check if server is running:
+netstat -an | grep 5001
+
+================================================================================
+🛠️ TROUBLESHOOTING COMMANDS
+================================================================================
+
+# Check PostgreSQL status:
+# WINDOWS:
+net start postgresql-x64-17
+
+# LINUX:
+sudo systemctl status postgresql
+
+# macOS:
+brew services list | grep postgresql
+
+# Check Python version:
+python --version
+
+# Check virtual environment:
+which python
+
+# Kill process on port 5001:
+# WINDOWS:
+netstat -ano | findstr :5001
+taskkill /PID <PID_NUMBER> /F
+
+# macOS/LINUX:
+lsof -ti:5001 | xargs kill -9
+
+================================================================================
+📱 ACCESS URLS
+================================================================================
+
+Local Frontend: file:///path/to/frontend_simple/index.html
+API Server: http://localhost:5001
+Network Access: http://YOUR_IP:5001
+GitHub Pages: https://YOUR_USERNAME.github.io/stockinventorymanagement_system
+
+================================================================================
+🎯 QUICK TEST SEQUENCE
+================================================================================
+
+1. Open frontend in browser
+2. Go to "Dashboard" - should show sample data
+3. Go to "Manage Inventory" - add a test product
+4. Go to "Record Sales" - make a test sale
+5. Download PDF receipt
+6. Go to "Reports" - download weekly report
+7. Verify unit prices are shown correctly
+
+================================================================================
+
+🌾 Your SRI LAKSHMI ENTERPRISES system is ready! 🚜
