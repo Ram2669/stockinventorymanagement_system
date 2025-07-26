@@ -1,3 +1,4 @@
+
 # 🌾 SRI LAKSHMI ENTERPRISES - Agricultural Stock Management System
 
 A beautiful farming-themed stock management system with PostgreSQL database and GitHub Pages deployment. **Ready to deploy on any system with automated setup scripts!**
