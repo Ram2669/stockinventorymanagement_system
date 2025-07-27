@@ -4,6 +4,11 @@ let stockData = [];
 let lastSaleId = null;
 let allProducts = [];
 
+// EMERGENCY DEBUG
+console.log('🚨 EMERGENCY: Salesperson dashboard JavaScript loaded!');
+console.log('🚨 API_BASE:', typeof API_BASE !== 'undefined' ? API_BASE : 'UNDEFINED');
+console.log('🚨 axios available:', typeof axios !== 'undefined');
+
 // Check authentication on page load
 window.addEventListener('DOMContentLoaded', async () => {
     await checkAuthentication();
@@ -567,7 +572,140 @@ document.getElementById('productSelect').addEventListener('change', function() {
     }
 });
 
+// EMERGENCY SIMPLE SALE RECORDING FUNCTION
+async function recordSaleEmergency() {
+    try {
+        console.log('🚨 EMERGENCY: Starting simple sale recording...');
+
+        // Get form values directly
+        const productSearch = document.getElementById('productSearch').value.trim();
+        const customerName = document.getElementById('customer_name').value.trim();
+        const quantity = parseInt(document.getElementById('quantity_sold').value);
+        const paymentStatus = document.getElementById('payment_status').value;
+        const paymentMethod = document.getElementById('payment_method').value;
+
+        console.log('Form values:', { productSearch, customerName, quantity, paymentStatus, paymentMethod });
+
+        // Basic validation
+        if (!productSearch || !customerName || !quantity) {
+            alert('❌ Please fill all required fields: Product, Customer Name, and Quantity');
+            return;
+        }
+
+        // Find product by name (simple search)
+        let selectedProduct = null;
+        if (allProducts && allProducts.length > 0) {
+            selectedProduct = allProducts.find(p =>
+                p.product_name.toLowerCase().includes(productSearch.toLowerCase()) ||
+                productSearch.toLowerCase().includes(p.product_name.toLowerCase())
+            );
+        }
+
+        if (!selectedProduct) {
+            alert('❌ Product not found. Available products: ' + (allProducts ? allProducts.map(p => p.product_name).join(', ') : 'None loaded'));
+            return;
+        }
+
+        console.log('Selected product:', selectedProduct);
+
+        // Use default unit price if not set
+        const unitPrice = selectedProduct.unit_price || 100; // Default price
+
+        const saleData = {
+            product_name: selectedProduct.product_name,
+            company_name: selectedProduct.company_name,
+            customer_name: customerName,
+            quantity_sold: quantity,
+            unit_price: unitPrice,
+            payment_status: paymentStatus || 'unpaid',
+            payment_method: paymentMethod || null
+        };
+
+        console.log('🚨 EMERGENCY: Submitting sale data:', saleData);
+
+        // Submit sale
+        const response = await axios.post(`${API_BASE}/sales`, saleData);
+        console.log('✅ EMERGENCY: Sale recorded successfully!', response.data);
+
+        // Show success
+        alert('✅ SALE RECORDED SUCCESSFULLY!\nSale ID: ' + response.data.sale_id + '\nAmount: Rs.' + response.data.sale_amount);
+
+        // Close modal and refresh
+        closeRecordSaleModal();
+        await loadDashboardData();
+
+    } catch (error) {
+        console.error('❌ EMERGENCY: Sale recording failed:', error);
+        alert('❌ SALE RECORDING FAILED!\nError: ' + (error.response?.data?.error || error.message));
+    }
+}
+
+// EMERGENCY TEST FUNCTION - Direct sale recording
+async function emergencyTestSale() {
+    try {
+        console.log('🚨 EMERGENCY TEST: Starting direct sale recording...');
+
+        // Get available products
+        const response = await axios.get(`${API_BASE}/stock`);
+        const products = response.data;
+        console.log('Available products:', products);
+
+        if (!products || products.length === 0) {
+            alert('❌ No products available in stock!');
+            return;
+        }
+
+        // Find a product with stock
+        const availableProduct = products.find(p => p.quantity > 0);
+        if (!availableProduct) {
+            alert('❌ No products with available stock!');
+            return;
+        }
+
+        console.log('Using product for test:', availableProduct);
+
+        // Create test sale data
+        const testSaleData = {
+            product_name: availableProduct.product_name,
+            company_name: availableProduct.company_name,
+            customer_name: 'EMERGENCY TEST CUSTOMER',
+            quantity_sold: 1,
+            unit_price: availableProduct.unit_price || 100,
+            payment_status: 'paid',
+            payment_method: 'cash'
+        };
+
+        console.log('🚨 EMERGENCY TEST: Submitting test sale:', testSaleData);
+
+        // Submit test sale
+        const saleResponse = await axios.post(`${API_BASE}/sales`, testSaleData);
+        console.log('✅ EMERGENCY TEST: Sale recorded successfully!', saleResponse.data);
+
+        // Show success
+        alert('✅ EMERGENCY TEST SUCCESSFUL!\n' +
+              'Sale ID: ' + saleResponse.data.sale_id + '\n' +
+              'Product: ' + testSaleData.product_name + '\n' +
+              'Amount: Rs.' + saleResponse.data.sale_amount + '\n' +
+              'Stock should be updated automatically!');
+
+        // Refresh dashboard
+        await loadDashboardData();
+
+    } catch (error) {
+        console.error('❌ EMERGENCY TEST FAILED:', error);
+        alert('❌ EMERGENCY TEST FAILED!\nError: ' + (error.response?.data?.error || error.message));
+    }
+}
+
 // Record sale form handler
+document.getElementById('recordSaleForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    console.log('🚨 Form submitted - calling emergency function...');
+    await recordSaleEmergency();
+});
+
+// BACKUP: Original complex form handler (commented out for debugging)
+/*
 document.getElementById('recordSaleForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -612,6 +750,7 @@ document.getElementById('recordSaleForm').addEventListener('submit', async (e) =
 
     // Calculate sale amount using admin-set price
     saleData.sale_amount = quantity * selectedProduct.unit_price;
+*/
 
     try {
         console.log('Submitting sale data:', saleData);
