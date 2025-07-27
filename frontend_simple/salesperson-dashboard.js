@@ -357,10 +357,13 @@ document.getElementById('recordSaleForm').addEventListener('submit', async (e) =
     saleData.sale_amount = quantity * selectedProduct.unit_price;
 
     try {
+        console.log('Submitting sale data:', saleData);
         const response = await axios.post(`${API_BASE}/sales`, saleData);
+        console.log('Sale response:', response.data);
 
         // Store the sale ID for receipt generation
         lastSaleId = response.data.sale_id;
+        console.log('Sale ID stored:', lastSaleId);
 
         // Show success modal with sale details
         showSaleSuccessModal(response.data);
@@ -370,6 +373,7 @@ document.getElementById('recordSaleForm').addEventListener('submit', async (e) =
         loadDashboardData(); // Reload to update stock alerts
 
     } catch (error) {
+        console.error('Sale submission error:', error);
         const errorMessage = error.response?.data?.error || 'Failed to record sale';
         showMessage(errorMessage, 'error');
     }
@@ -455,11 +459,19 @@ function logout() {
 
 // Show sale success modal
 function showSaleSuccessModal(saleData) {
+    console.log('Showing sale success modal with data:', saleData);
+
     const saleDetails = document.getElementById('saleDetails');
+    if (!saleDetails) {
+        console.error('saleDetails element not found!');
+        return;
+    }
+
     saleDetails.innerHTML = `
         <div style="background: #e8f5e8; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
             <h4 style="color: #2e7d32; margin: 0 0 15px 0; font-size: 1.3em;">✅ Sale Recorded Successfully!</h4>
             <div style="background: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+                <p><strong>Sale ID:</strong> ${saleData.sale_id}</p>
                 <p><strong>Customer:</strong> ${saleData.customer_name}</p>
                 <p><strong>Product:</strong> ${saleData.product_name} (${saleData.company_name})</p>
                 <p><strong>Quantity:</strong> ${saleData.quantity_sold}</p>
@@ -472,7 +484,14 @@ function showSaleSuccessModal(saleData) {
         </div>
     `;
 
-    document.getElementById('saleSuccessModal').style.display = 'block';
+    const modal = document.getElementById('saleSuccessModal');
+    if (!modal) {
+        console.error('saleSuccessModal element not found!');
+        return;
+    }
+
+    modal.style.display = 'block';
+    console.log('Sale success modal displayed');
 }
 
 function closeSaleSuccessModal() {
@@ -481,9 +500,13 @@ function closeSaleSuccessModal() {
 
 // Download receipt
 async function downloadReceipt() {
+    console.log('Download receipt called, lastSaleId:', lastSaleId);
+
     // Try to get sale ID from input field first, then fallback to lastSaleId
     const inputElement = document.getElementById('receiptSaleIdInput');
     const saleId = inputElement ? inputElement.value : lastSaleId;
+
+    console.log('Using sale ID:', saleId);
 
     if (!saleId) {
         alert('Please enter a sale ID or record a sale first');
@@ -491,10 +514,12 @@ async function downloadReceipt() {
     }
 
     try {
+        console.log('Requesting receipt for sale ID:', saleId);
         const response = await axios.get(`${API_BASE}/sales/${saleId}/receipt`, {
             responseType: 'blob'
         });
 
+        console.log('Receipt response received');
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
@@ -504,18 +529,23 @@ async function downloadReceipt() {
         link.remove();
         window.URL.revokeObjectURL(url);
 
-        alert('Receipt downloaded successfully!');
+        showMessage('Receipt downloaded successfully!', 'success');
     } catch (error) {
         console.error('Error downloading receipt:', error);
-        alert('Error downloading receipt. Please check if the sale ID exists.');
+        const errorMsg = error.response?.data?.error || 'Error downloading receipt. Please check if the sale ID exists.';
+        showMessage(errorMsg, 'error');
     }
 }
 
 // Print receipt
 async function printReceipt() {
+    console.log('Print receipt called, lastSaleId:', lastSaleId);
+
     // Try to get sale ID from input field first, then fallback to lastSaleId
     const inputElement = document.getElementById('receiptSaleIdInput');
     const saleId = inputElement ? inputElement.value : lastSaleId;
+
+    console.log('Using sale ID for print:', saleId);
 
     if (!saleId) {
         alert('Please enter a sale ID or record a sale first');
@@ -523,18 +553,22 @@ async function printReceipt() {
     }
 
     try {
+        console.log('Requesting receipt for printing, sale ID:', saleId);
         const response = await axios.get(`${API_BASE}/sales/${saleId}/receipt`, {
             responseType: 'blob'
         });
 
+        console.log('Receipt response received for printing');
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const printWindow = window.open(url);
         printWindow.onload = function() {
             printWindow.print();
         };
+        showMessage('Receipt opened for printing!', 'success');
     } catch (error) {
         console.error('Error printing receipt:', error);
-        alert('Error printing receipt. Please check if the sale ID exists.');
+        const errorMsg = error.response?.data?.error || 'Error printing receipt. Please check if the sale ID exists.';
+        showMessage(errorMsg, 'error');
     }
 }
 

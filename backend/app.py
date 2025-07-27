@@ -213,7 +213,15 @@ def record_sale():
 
     return jsonify({
         "message": "Sale recorded successfully",
-        "sale_id": new_sale.id
+        "sale_id": new_sale.id,
+        "customer_name": new_sale.customer_name,
+        "product_name": new_sale.product_name,
+        "company_name": new_sale.company_name,
+        "quantity_sold": new_sale.quantity_sold,
+        "unit_price": new_sale.unit_price,
+        "sale_amount": new_sale.sale_amount,
+        "payment_status": new_sale.payment_status,
+        "payment_method": new_sale.payment_method
     }), 201
 
 # Get paid sales
