@@ -212,6 +212,184 @@ async function loadProducts() {
     }
 }
 
+// CRITICAL FIX: Force refresh all UI elements that display stock quantities
+async function forceRefreshAllStockUI() {
+    try {
+        console.log('🔄 Force refreshing all stock UI elements...');
+
+        // 1. Reload fresh stock data from server
+        const response = await axios.get(`${API_BASE}/stock?refresh=${Date.now()}`);
+        const freshStockData = response.data;
+        console.log('✅ Fresh stock data loaded:', freshStockData.length, 'items');
+
+        // 2. Update global variables
+        stockData = freshStockData;
+        allProducts = freshStockData;
+
+        // 3. Force refresh product search suggestions if visible
+        const suggestions = document.getElementById('productSuggestions');
+        if (suggestions && suggestions.style.display === 'block') {
+            console.log('🔄 Refreshing product search suggestions...');
+            setupProductSearch();
+        }
+
+        // 4. Force refresh product dropdown
+        console.log('🔄 Refreshing product dropdown...');
+        const productSelect = document.getElementById('productSelect');
+        if (productSelect) {
+            productSelect.innerHTML = '<option value="">Select a product...</option>';
+            freshStockData.forEach(item => {
+                if (item.quantity > 0) {
+                    productSelect.innerHTML += `
+                        <option value="${item.product_name}|${item.company_name}" data-stock="${item.quantity}">
+                            ${item.product_name} (${item.company_name}) - ${item.quantity} available
+                        </option>
+                    `;
+                }
+            });
+        }
+
+        // 5. Clear any selected product to force re-selection with fresh data
+        const selectedProductId = document.getElementById('selectedProductId');
+        if (selectedProductId) {
+            selectedProductId.value = '';
+        }
+
+        // 6. Clear product search input to force fresh search
+        const productSearch = document.getElementById('productSearch');
+        if (productSearch && productSearch.value) {
+            console.log('🔄 Clearing product search to force refresh...');
+            productSearch.value = '';
+            suggestions.style.display = 'none';
+        }
+
+        console.log('✅ All stock UI elements refreshed successfully!');
+
+    } catch (error) {
+        console.error('❌ Error force refreshing stock UI:', error);
+    }
+}
+
+// CRITICAL FIX: Force refresh daily sales UI immediately
+async function forceRefreshDailySalesUI() {
+    try {
+        console.log('🔄 Force refreshing daily sales UI...');
+
+        // Force reload daily sales with fresh timestamp
+        const response = await axios.get(`${API_BASE}/sales/daily?refresh=${Date.now()}`);
+        const freshDailySales = response.data;
+        console.log('✅ Fresh daily sales loaded:', freshDailySales.sales.length, 'sales today');
+
+        // Update daily sales summary cards immediately
+        const summaryElement = document.getElementById('dailySalesSummary');
+        if (summaryElement) {
+            summaryElement.innerHTML = `
+                <div class="action-card" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                    <div class="icon"><i class="fas fa-shopping-cart"></i></div>
+                    <h3>${freshDailySales.summary.total_sales}</h3>
+                    <p>Sales Today</p>
+                </div>
+                <div class="action-card" style="background: linear-gradient(135deg, #ffc107, #fd7e14);">
+                    <div class="icon"><i class="fas fa-rupee-sign"></i></div>
+                    <h3>Rs.${freshDailySales.summary.total_revenue.toFixed(0)}</h3>
+                    <p>Revenue Today</p>
+                </div>
+                <div class="action-card" style="background: linear-gradient(135deg, #17a2b8, #6f42c1);">
+                    <div class="icon"><i class="fas fa-check-circle"></i></div>
+                    <h3>${freshDailySales.summary.paid_sales}</h3>
+                    <p>Paid Sales</p>
+                </div>
+                <div class="action-card" style="background: linear-gradient(135deg, #dc3545, #e83e8c);">
+                    <div class="icon"><i class="fas fa-clock"></i></div>
+                    <h3>${freshDailySales.summary.unpaid_sales}</h3>
+                    <p>Unpaid Sales</p>
+                </div>
+            `;
+            console.log('✅ Daily sales summary cards updated');
+        }
+
+        // Update daily sales list immediately
+        const salesList = document.getElementById('dailySalesList');
+        if (salesList) {
+            if (freshDailySales.sales.length === 0) {
+                salesList.innerHTML = `
+                    <div class="no-alerts">
+                        <i class="fas fa-calendar-day" style="font-size: 2em; margin-bottom: 10px;"></i>
+                        <div>📅 No sales recorded today</div>
+                        <div style="font-size: 0.9em; margin-top: 5px;">Start recording sales to see them here!</div>
+                    </div>
+                `;
+            } else {
+                salesList.innerHTML = `
+                    <div class="sales-list">
+                        ${freshDailySales.sales.map(sale => `
+                            <div class="alert-item">
+                                <div class="alert-info">
+                                    <h4>#${sale.id} - ${sale.customer_name}</h4>
+                                    <p>${sale.product_name} (${sale.company_name}) • Qty: ${sale.quantity_sold}</p>
+                                    <small>${new Date(sale.sale_date).toLocaleTimeString()}</small>
+                                </div>
+                                <div class="alert-status">
+                                    <div class="status ${sale.payment_status === 'paid' ? 'paid' : 'unpaid'}">
+                                        ${sale.payment_status === 'paid' ? '✅ Paid' : '💰 Unpaid'}
+                                    </div>
+                                    <div class="quantity">Rs.${sale.sale_amount.toFixed(2)}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            console.log('✅ Daily sales list updated');
+        }
+
+        console.log('✅ Daily sales UI refreshed successfully!');
+
+    } catch (error) {
+        console.error('❌ Error force refreshing daily sales UI:', error);
+    }
+}
+
+// Show refresh notification to user
+function showRefreshNotification(message, type = 'info') {
+    // Remove any existing notification
+    const existingNotification = document.getElementById('refreshNotification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.id = 'refreshNotification';
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10001;
+        padding: 15px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: bold;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+        max-width: 300px;
+        background: ${type === 'success' ? 'linear-gradient(135deg, #28a745, #20c997)' : 'linear-gradient(135deg, #17a2b8, #6f42c1)'};
+    `;
+    notification.innerHTML = message;
+
+    // Add to page
+    document.body.appendChild(notification);
+
+    // Auto remove after 3 seconds for success, 2 seconds for info
+    setTimeout(() => {
+        if (notification) {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => notification.remove(), 300);
+        }
+    }, type === 'success' ? 3000 : 2000);
+}
+
 // Setup product search functionality
 function setupProductSearch() {
     const productSearch = document.getElementById('productSearch');
@@ -447,6 +625,9 @@ document.getElementById('recordSaleForm').addEventListener('submit', async (e) =
         // Close record sale modal FIRST
         closeRecordSaleModal();
 
+        // Show immediate refresh notification
+        showRefreshNotification('🔄 Updating inventory and sales data...');
+
         // Show success modal with sale details immediately
         console.log('About to show success modal...');
         showSaleSuccessModal(response.data);
@@ -454,7 +635,18 @@ document.getElementById('recordSaleForm').addEventListener('submit', async (e) =
         // Immediately reload data to update stock and daily sales
         console.log('Reloading dashboard data immediately...');
         await loadDashboardData(); // Reload to update stock alerts and daily sales
-        console.log('Dashboard data reloaded successfully');
+
+        // Force refresh all UI elements that display stock quantities
+        console.log('Force refreshing all UI elements...');
+        await forceRefreshAllStockUI();
+
+        // Force refresh daily sales UI immediately
+        console.log('Force refreshing daily sales UI...');
+        await forceRefreshDailySalesUI();
+
+        // Show success notification
+        showRefreshNotification('✅ Sale recorded! Inventory and sales updated successfully!', 'success');
+        console.log('All UI elements refreshed successfully');
 
     } catch (error) {
         console.error('Sale submission error:', error);

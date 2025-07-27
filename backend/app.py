@@ -206,14 +206,23 @@ def record_sale():
         payment_date=payment_date
     )
 
-    # Update stock quantity
-    old_quantity = stock.quantity
-    stock.quantity -= int(data['quantity_sold'])
-    print(f"Stock update: {stock.product_name} - Old quantity: {old_quantity}, New quantity: {stock.quantity}")
+    try:
+        # Update stock quantity
+        old_quantity = stock.quantity
+        stock.quantity -= int(data['quantity_sold'])
+        print(f"Stock update: {stock.product_name} - Old quantity: {old_quantity}, New quantity: {stock.quantity}")
 
-    db.session.add(new_sale)
-    db.session.commit()
-    print(f"Sale recorded and stock updated successfully")
+        # Add sale to session
+        db.session.add(new_sale)
+
+        # Commit both sale and stock update in single transaction
+        db.session.commit()
+        print(f"✅ Sale recorded and stock updated successfully - Sale ID: {new_sale.id}")
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"❌ Error recording sale: {str(e)}")
+        return jsonify({"error": f"Failed to record sale: {str(e)}"}), 500
 
     return jsonify({
         "message": "Sale recorded successfully",
