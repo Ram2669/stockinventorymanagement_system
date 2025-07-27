@@ -716,9 +716,15 @@ function displayStockList(stocksToDisplay, searchTerm = '') {
 
 // Close modal when clicking outside
 window.onclick = function(event) {
-    const modal = document.getElementById('saleSuccessModal');
-    if (event.target === modal) {
+    const saleModal = document.getElementById('saleSuccessModal');
+    const paymentModal = document.getElementById('paymentMethodModal');
+
+    if (event.target === saleModal) {
         closeSaleModal();
+    }
+
+    if (event.target === paymentModal) {
+        closePaymentModal();
     }
 }
 
@@ -827,16 +833,63 @@ function updateUnpaidSalesTable() {
 
 // Mark sale as paid
 async function markAsPaid(saleId) {
-    const paymentMethod = prompt('Payment method (cash/card/upi/bank_transfer/cheque):');
-    if (!paymentMethod) return;
+    // Store the sale ID for later use
+    window.currentPaymentSaleId = saleId;
+
+    // Find the sale details
+    const sale = window.unpaidSales.find(s => s.id === saleId);
+    if (!sale) {
+        showToast('Sale not found', 'error');
+        return;
+    }
+
+    // Show sale details in the modal
+    document.getElementById('paymentSaleDetails').innerHTML = `
+        <div class="payment-sale-info">
+            <h4>Sale Details:</h4>
+            <p><strong>Customer:</strong> ${sale.customer_name}</p>
+            <p><strong>Product:</strong> ${sale.product_name} (${sale.company_name})</p>
+            <p><strong>Quantity:</strong> ${sale.quantity_sold}</p>
+            <p><strong>Amount:</strong> Rs.${sale.sale_amount.toFixed(2)}</p>
+            <p><strong>Sale Date:</strong> ${new Date(sale.sale_date).toLocaleDateString()}</p>
+        </div>
+    `;
+
+    // Reset the payment method selection
+    document.getElementById('paymentMethodSelect').value = '';
+
+    // Show the modal
+    document.getElementById('paymentMethodModal').style.display = 'block';
+}
+
+// Close payment method modal
+function closePaymentModal() {
+    document.getElementById('paymentMethodModal').style.display = 'none';
+    window.currentPaymentSaleId = null;
+}
+
+// Confirm payment with selected method
+async function confirmPayment() {
+    const paymentMethod = document.getElementById('paymentMethodSelect').value;
+
+    if (!paymentMethod) {
+        showToast('Please select a payment method', 'error');
+        return;
+    }
+
+    if (!window.currentPaymentSaleId) {
+        showToast('No sale selected', 'error');
+        return;
+    }
 
     try {
-        await axios.put(`${API_BASE}/sales/${saleId}/payment`, {
+        await axios.put(`${API_BASE}/sales/${window.currentPaymentSaleId}/payment`, {
             payment_status: 'paid',
-            payment_method: paymentMethod.toLowerCase()
+            payment_method: paymentMethod
         });
 
         showToast('Payment status updated successfully!', 'success');
+        closePaymentModal();
         await loadPaymentData(); // Reload payment data
     } catch (error) {
         console.error('Error updating payment status:', error);
