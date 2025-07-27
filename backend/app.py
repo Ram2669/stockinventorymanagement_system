@@ -282,7 +282,7 @@ def generate_date_report():
         mimetype='application/pdf'
     )
 
-@app.route('/api/receipt/<int:sale_id>', methods=['GET'])
+@app.route('/api/sales/<int:sale_id>/receipt', methods=['GET'])
 def generate_receipt(sale_id):
     from pdf_generator import PDFGenerator
 
@@ -297,6 +297,9 @@ def generate_receipt(sale_id):
         'customer_name': sale.customer_name,
         'unit_price': sale.unit_price,
         'sale_amount': sale.sale_amount,
+        'payment_status': sale.payment_status,
+        'payment_method': sale.payment_method,
+        'payment_date': sale.payment_date.strftime('%Y-%m-%d %H:%M:%S') if sale.payment_date else None,
         'sale_date': sale.sale_date.strftime('%Y-%m-%d %H:%M:%S')
     }
 
