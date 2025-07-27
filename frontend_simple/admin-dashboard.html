@@ -256,6 +256,51 @@
             border-radius: 8px;
             margin-bottom: 20px;
         }
+
+        /* Daily Sales Styles */
+        .sales-table {
+            overflow-x: auto;
+        }
+
+        .sales-table table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .sales-table th,
+        .sales-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .sales-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .sales-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .payment-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .payment-status.paid {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .payment-status.unpaid {
+            background: #f8d7da;
+            color: #721c24;
+        }
     </style>
 </head>
 <body>
@@ -284,6 +329,17 @@
             </button>
             <div id="stockInventoryList">
                 <div class="loading">Loading stock inventory...</div>
+            </div>
+        </div>
+
+        <!-- Daily Sales Section -->
+        <div class="user-management">
+            <h2><i class="fas fa-calendar-day"></i> Today's Sales</h2>
+            <div id="dailySalesSummary" class="stats-grid" style="margin-bottom: 20px;">
+                <div class="loading">Loading today's sales summary...</div>
+            </div>
+            <div id="dailySalesList">
+                <div class="loading">Loading today's sales...</div>
             </div>
         </div>
 

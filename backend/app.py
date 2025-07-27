@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from flask_migrate import Migrate
 from datetime import datetime, timedelta
+from sqlalchemy import func
 import os
 from config import config
 
