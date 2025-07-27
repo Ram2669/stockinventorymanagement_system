@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - SRI LAKSHMI ENTERPRISES</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .admin-header {
+            background: linear-gradient(135deg, #2F4F2F, #228B22);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .admin-header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        
+        .admin-header p {
+            margin: 10px 0 0 0;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #32CD32;
+        }
+        
+        .stat-card.revenue {
+            border-left-color: #228B22;
+        }
+        
+        .stat-card.payment {
+            border-left-color: #FFD700;
+        }
+        
+        .stat-card.stock {
+            border-left-color: #FF6347;
+        }
+        
+        .stat-card h3 {
+            font-size: 2.5em;
+            margin: 0;
+            color: #2F4F2F;
+        }
+        
+        .stat-card p {
+            margin: 10px 0 0 0;
+            color: #556B2F;
+            font-weight: bold;
+        }
+        
+        .stat-card .icon {
+            font-size: 3em;
+            color: #32CD32;
+            margin-bottom: 15px;
+        }
+        
+        .analytics-section {
+            margin-bottom: 40px;
+        }
+        
+        .analytics-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .analytics-header h2 {
+            color: #2F4F2F;
+            margin: 0;
+        }
+        
+        .period-selector {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .period-btn {
+            padding: 8px 16px;
+            border: 2px solid #32CD32;
+            background: white;
+            color: #32CD32;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .period-btn.active,
+        .period-btn:hover {
+            background: #32CD32;
+            color: white;
+        }
+        
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+        }
+        
+        .analytics-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .analytics-card h3 {
+            color: #2F4F2F;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #32CD32;
+        }
+        
+        .product-info h4 {
+            margin: 0;
+            color: #2F4F2F;
+        }
+        
+        .product-info p {
+            margin: 5px 0 0 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .product-stats {
+            text-align: right;
+        }
+        
+        .product-stats .revenue {
+            font-weight: bold;
+            color: #228B22;
+            font-size: 1.1em;
+        }
+        
+        .product-stats .quantity {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .user-management {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .add-user-btn {
+            background: linear-gradient(135deg, #32CD32, #228B22);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .add-user-btn:hover {
+            background: linear-gradient(135deg, #228B22, #006400);
+        }
+        
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .user-table th,
+        .user-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .user-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #2F4F2F;
+        }
+        
+        .role-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .role-badge.admin {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .role-badge.salesperson {
+            background: #28a745;
+            color: white;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+        <h1><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h1>
+        <p>SRI LAKSHMI ENTERPRISES - Complete Business Overview</p>
+    </div>
+
+    <div class="container">
+        <!-- Dashboard Stats -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="loading">Loading dashboard statistics...</div>
+        </div>
+
+        <!-- User Management -->
+        <div class="user-management">
+            <h2><i class="fas fa-users"></i> User Management</h2>
+            <button class="add-user-btn" onclick="showAddUserModal()">
+                <i class="fas fa-user-plus"></i> Add Salesperson
+            </button>
+            <div id="usersList">
+                <div class="loading">Loading users...</div>
+            </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div class="analytics-section">
+            <div class="analytics-header">
+                <h2><i class="fas fa-chart-line"></i> Sales Analytics</h2>
+                <div class="period-selector">
+                    <button class="period-btn" onclick="changePeriod(7)">7 Days</button>
+                    <button class="period-btn active" onclick="changePeriod(30)">30 Days</button>
+                    <button class="period-btn" onclick="changePeriod(90)">90 Days</button>
+                </div>
+            </div>
+            
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <h3><i class="fas fa-trophy"></i> Top Selling Products</h3>
+                    <div id="topProducts">
+                        <div class="loading">Loading top products...</div>
+                    </div>
+                </div>
+                
+                <div class="analytics-card">
+                    <h3><i class="fas fa-users"></i> Top Customers</h3>
+                    <div id="topCustomers">
+                        <div class="loading">Loading customer data...</div>
+                    </div>
+                </div>
+                
+                <div class="analytics-card">
+                    <h3><i class="fas fa-boxes"></i> Stock Movement</h3>
+                    <div id="stockMovement">
+                        <div class="loading">Loading stock analysis...</div>
+                    </div>
+                </div>
+                
+                <div class="analytics-card">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Stock Alerts</h3>
+                    <div id="stockAlerts">
+                        <div class="loading">Loading stock alerts...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-plus"></i> Add Salesperson</h2>
+                <span class="close" onclick="closeAddUserModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="addUserMessage"></div>
+                <form id="addUserForm">
+                    <div class="form-group">
+                        <label for="userFullName">Full Name:</label>
+                        <input type="text" id="userFullName" name="full_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userUsername">Username:</label>
+                        <input type="text" id="userUsername" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userEmail">Email:</label>
+                        <input type="email" id="userEmail" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userPassword">Password:</label>
+                        <input type="password" id="userPassword" name="password" required>
+                        <small style="color: #666;">At least 6 characters with letters and numbers</small>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-user-plus"></i> Add Salesperson
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="closeAddUserModal()">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="config.js"></script>
+    <script src="admin-dashboard.js"></script>
+</body>
+</html>

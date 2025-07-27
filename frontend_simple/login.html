@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRI LAKSHMI ENTERPRISES - Login</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .login-header {
+            margin-bottom: 30px;
+        }
+        
+        .login-header h1 {
+            color: #2F4F2F;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        
+        .login-header p {
+            color: #556B2F;
+            font-size: 1.1em;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #2F4F2F;
+            font-weight: bold;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #9ACD32;
+            border-radius: 8px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #228B22;
+            box-shadow: 0 0 10px rgba(34, 139, 34, 0.3);
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #32CD32, #228B22);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .btn-login:hover {
+            background: linear-gradient(135deg, #228B22, #006400);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(34, 139, 34, 0.4);
+        }
+        
+        .btn-login:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .role-selector {
+            margin-bottom: 20px;
+        }
+        
+        .role-selector label {
+            display: inline-block;
+            margin-right: 20px;
+            color: #2F4F2F;
+        }
+        
+        .role-selector input[type="radio"] {
+            margin-right: 5px;
+        }
+        
+        .register-link {
+            color: #228B22;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .register-link:hover {
+            text-decoration: underline;
+        }
+        
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c62828;
+        }
+        
+        .success-message {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2e7d32;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .register-form {
+            display: none;
+        }
+        
+        .register-form.active {
+            display: block;
+        }
+        
+        .back-btn {
+            background: #666;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        
+        .back-btn:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <!-- Login Form -->
+            <div id="loginForm">
+                <div class="login-header">
+                    <h1><i class="fas fa-seedling"></i> SRI LAKSHMI</h1>
+                    <p>ENTERPRISES</p>
+                </div>
+                
+                <div id="messageContainer"></div>
+                
+                <form id="loginFormElement">
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-login" id="loginBtn">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </form>
+                
+                <p>
+                    Need to register? 
+                    <a href="#" class="register-link" onclick="showAdminRegister()">Register as Admin</a>
+                </p>
+            </div>
+            
+            <!-- Admin Registration Form -->
+            <div id="adminRegisterForm" class="register-form">
+                <button class="back-btn" onclick="showLogin()">
+                    <i class="fas fa-arrow-left"></i> Back to Login
+                </button>
+                
+                <div class="login-header">
+                    <h1><i class="fas fa-user-shield"></i> Admin Registration</h1>
+                    <p>Register the first admin user</p>
+                </div>
+                
+                <div id="registerMessageContainer"></div>
+                
+                <form id="adminRegisterFormElement">
+                    <div class="form-group">
+                        <label for="adminFullName">Full Name:</label>
+                        <input type="text" id="adminFullName" name="full_name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="adminUsername">Username:</label>
+                        <input type="text" id="adminUsername" name="username" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="adminEmail">Email:</label>
+                        <input type="email" id="adminEmail" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="adminPassword">Password:</label>
+                        <input type="password" id="adminPassword" name="password" required>
+                        <small style="color: #666;">At least 6 characters with letters and numbers</small>
+                    </div>
+                    
+                    <button type="submit" class="btn-login" id="registerBtn">
+                        <i class="fas fa-user-plus"></i> Register Admin
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="config.js"></script>
+    <script>
+        // Check if admin exists on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await axios.get(`${API_BASE}/auth/check-admin-exists`);
+                if (response.data.admin_exists) {
+                    // Admin exists, show normal login
+                    document.querySelector('.register-link').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error checking admin status:', error);
+            }
+        });
+
+        function showMessage(message, type, container = 'messageContainer') {
+            const messageDiv = document.getElementById(container);
+            messageDiv.innerHTML = `<div class="${type}-message">${message}</div>`;
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        function showLogin() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('adminRegisterForm').style.display = 'none';
+        }
+
+        function showAdminRegister() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('adminRegisterForm').style.display = 'block';
+        }
+
+        // Login form handler
+        document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+            
+            try {
+                const formData = new FormData(e.target);
+                const loginData = {
+                    username: formData.get('username'),
+                    password: formData.get('password')
+                };
+                
+                const response = await axios.post(`${API_BASE}/auth/login`, loginData);
+                
+                // Store session data
+                localStorage.setItem('session_token', response.data.session_token);
+                localStorage.setItem('user_data', JSON.stringify(response.data.user));
+                
+                showMessage('Login successful! Redirecting...', 'success');
+                
+                // Redirect based on role
+                setTimeout(() => {
+                    if (response.data.user.role === 'admin') {
+                        window.location.href = 'admin-dashboard.html';
+                    } else {
+                        window.location.href = 'salesperson-dashboard.html';
+                    }
+                }, 1500);
+                
+            } catch (error) {
+                const errorMessage = error.response?.data?.error || 'Login failed. Please try again.';
+                showMessage(errorMessage, 'error');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+            }
+        });
+
+        // Admin registration form handler
+        document.getElementById('adminRegisterFormElement').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const registerBtn = document.getElementById('registerBtn');
+            registerBtn.disabled = true;
+            registerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
+            
+            try {
+                const formData = new FormData(e.target);
+                const registerData = {
+                    full_name: formData.get('full_name'),
+                    username: formData.get('username'),
+                    email: formData.get('email'),
+                    password: formData.get('password')
+                };
+                
+                const response = await axios.post(`${API_BASE}/auth/register/admin`, registerData);
+                
+                showMessage('Admin registered successfully! You can now login.', 'success', 'registerMessageContainer');
+                
+                // Clear form and switch to login after delay
+                setTimeout(() => {
+                    document.getElementById('adminRegisterFormElement').reset();
+                    showLogin();
+                    showMessage('Admin account created. Please login with your credentials.', 'success');
+                }, 2000);
+                
+            } catch (error) {
+                const errorMessage = error.response?.data?.error || 'Registration failed. Please try again.';
+                showMessage(errorMessage, 'error', 'registerMessageContainer');
+            } finally {
+                registerBtn.disabled = false;
+                registerBtn.innerHTML = '<i class="fas fa-user-plus"></i> Register Admin';
+            }
+        });
+    </script>
+</body>
+</html>

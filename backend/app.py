@@ -13,10 +13,16 @@ def create_app(config_name=None):
     app.config.from_object(config[config_name])
 
     # Import models and initialize db
-    from models import db, Stock, Sale
+    from models import db, Stock, Sale, User
+    from auth import auth_bp
+    from analytics import analytics_bp
 
     db.init_app(app)
     migrate = Migrate(app, db)
+
+    # Register blueprints
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(analytics_bp, url_prefix='/api/analytics')
 
     # Configure CORS for GitHub Pages
     CORS(app, origins=app.config['CORS_ORIGINS'],
