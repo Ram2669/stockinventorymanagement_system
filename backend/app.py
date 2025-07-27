@@ -163,6 +163,11 @@ def record_sale():
     quantity_sold = int(data['quantity_sold'])
     total_amount = unit_price * quantity_sold
 
+    # Get payment information
+    payment_status = data.get('payment_status', 'unpaid')
+    payment_method = data.get('payment_method', None)
+    payment_date = datetime.utcnow() if payment_status == 'paid' else None
+
     # Record the sale
     new_sale = Sale(
         product_name=data['product_name'],
@@ -170,7 +175,10 @@ def record_sale():
         quantity_sold=quantity_sold,
         customer_name=data['customer_name'],
         unit_price=unit_price,
-        sale_amount=total_amount
+        sale_amount=total_amount,
+        payment_status=payment_status,
+        payment_method=payment_method,
+        payment_date=payment_date
     )
 
     # Update stock quantity
@@ -183,6 +191,55 @@ def record_sale():
         "message": "Sale recorded successfully",
         "sale_id": new_sale.id
     }), 201
+
+# Get paid sales
+@app.route('/api/sales/paid', methods=['GET'])
+def get_paid_sales():
+    paid_sales = Sale.query.filter_by(payment_status='paid').order_by(Sale.sale_date.desc()).all()
+    return jsonify([sale.to_dict() for sale in paid_sales])
+
+# Get unpaid sales
+@app.route('/api/sales/unpaid', methods=['GET'])
+def get_unpaid_sales():
+    unpaid_sales = Sale.query.filter_by(payment_status='unpaid').order_by(Sale.sale_date.desc()).all()
+    return jsonify([sale.to_dict() for sale in unpaid_sales])
+
+# Update payment status
+@app.route('/api/sales/<int:sale_id>/payment', methods=['PUT'])
+def update_payment_status(sale_id):
+    sale = Sale.query.get_or_404(sale_id)
+    data = request.get_json()
+
+    sale.payment_status = data.get('payment_status', sale.payment_status)
+    sale.payment_method = data.get('payment_method', sale.payment_method)
+
+    if sale.payment_status == 'paid' and not sale.payment_date:
+        sale.payment_date = datetime.utcnow()
+    elif sale.payment_status == 'unpaid':
+        sale.payment_date = None
+
+    db.session.commit()
+    return jsonify(sale.to_dict())
+
+# Get payment summary
+@app.route('/api/sales/payment-summary', methods=['GET'])
+def get_payment_summary():
+    paid_sales = Sale.query.filter_by(payment_status='paid').all()
+    unpaid_sales = Sale.query.filter_by(payment_status='unpaid').all()
+
+    paid_amount = sum(sale.sale_amount for sale in paid_sales)
+    unpaid_amount = sum(sale.sale_amount for sale in unpaid_sales)
+    total_amount = paid_amount + unpaid_amount
+
+    return jsonify({
+        'paid_count': len(paid_sales),
+        'unpaid_count': len(unpaid_sales),
+        'total_count': len(paid_sales) + len(unpaid_sales),
+        'paid_amount': paid_amount,
+        'unpaid_amount': unpaid_amount,
+        'total_amount': total_amount,
+        'payment_percentage': (paid_amount / total_amount * 100) if total_amount > 0 else 0
+    })
 
 @app.route('/api/sales/weekly', methods=['GET'])
 def get_weekly_sales():

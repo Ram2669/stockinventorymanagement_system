@@ -19,7 +19,16 @@ def init_database():
         # Create all tables
         database.create_all()
         print("✅ Database tables created successfully!")
-        
+
+        # Update existing sales records to have payment status if they don't have it
+        existing_sales = SaleModel.query.filter(SaleModel.payment_status.is_(None)).all()
+        if existing_sales:
+            print(f"🔄 Updating {len(existing_sales)} existing sales with payment status...")
+            for sale in existing_sales:
+                sale.payment_status = 'unpaid'  # Default to unpaid for existing records
+            database.session.commit()
+            print("✅ Updated existing sales records!")
+
         # Check if we have any existing data
         stock_count = StockModel.query.count()
         sale_count = SaleModel.query.count()

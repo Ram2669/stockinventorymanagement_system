@@ -34,6 +34,9 @@
             <button class="nav-tab" onclick="showTab('sales')">
                 <i class="fas fa-handshake"></i> Record Sales
             </button>
+            <button class="nav-tab" onclick="showTab('payments')">
+                <i class="fas fa-money-bill-wave"></i> Payment Tracking
+            </button>
             <button class="nav-tab" onclick="showTab('reports')">
                 <i class="fas fa-clipboard-list"></i> Farm Reports
             </button>
@@ -203,7 +206,28 @@
                             <small style="color: #28a745;">Automatically calculated: Quantity × Unit Price</small>
                         </div>
                     </div>
-                    
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Payment Status</label>
+                            <select id="paymentStatus" required>
+                                <option value="unpaid">💰 Unpaid (Credit Sale)</option>
+                                <option value="paid">✅ Paid</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="paymentMethodGroup" style="display: none;">
+                            <label>Payment Method</label>
+                            <select id="paymentMethod">
+                                <option value="">Select method...</option>
+                                <option value="cash">💵 Cash</option>
+                                <option value="card">💳 Card</option>
+                                <option value="upi">📱 UPI</option>
+                                <option value="bank_transfer">🏦 Bank Transfer</option>
+                                <option value="cheque">📄 Cheque</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <button type="submit" class="btn btn-success">
                         <i class="fas fa-cash-register"></i> Record Sale
                     </button>
@@ -213,6 +237,74 @@
             <div id="selectedProductInfo" class="card" style="display: none; background-color: #f0fff4;">
                 <h3>Selected Product Details</h3>
                 <div id="productDetails"></div>
+            </div>
+        </div>
+
+        <!-- Payment Tracking Tab -->
+        <div id="payments" class="tab-content">
+            <div class="card">
+                <h2>💰 Payment Summary</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="paidAmount">Rs.0</h3>
+                        <p>Total Paid</p>
+                        <small id="paidCount">0 transactions</small>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="unpaidAmount">Rs.0</h3>
+                        <p>Total Unpaid</p>
+                        <small id="unpaidCount">0 transactions</small>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="paymentPercentage">0%</h3>
+                        <p>Payment Rate</p>
+                        <small>Paid vs Total</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>✅ Paid Sales</h2>
+                <div class="table-container">
+                    <table id="paidSalesTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Product</th>
+                                <th>Qty</th>
+                                <th>Unit Price</th>
+                                <th>Amount</th>
+                                <th>Payment Method</th>
+                                <th>Payment Date</th>
+                                <th>Receipt</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>⚠️ Unpaid Sales (Credit)</h2>
+                <div class="table-container">
+                    <table id="unpaidSalesTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Product</th>
+                                <th>Qty</th>
+                                <th>Unit Price</th>
+                                <th>Amount</th>
+                                <th>Days Pending</th>
+                                <th>Actions</th>
+                                <th>Receipt</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 

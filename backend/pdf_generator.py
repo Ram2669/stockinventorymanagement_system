@@ -289,7 +289,40 @@ class PDFGenerator:
         ]))
 
         story.append(total_table)
-        story.append(Spacer(1, 40))
+        story.append(Spacer(1, 20))
+
+        # Payment status section
+        payment_status = sale_data.get('payment_status', 'unpaid')
+        payment_method = sale_data.get('payment_method', '')
+        payment_date = sale_data.get('payment_date', '')
+
+        if payment_status == 'paid':
+            payment_color = colors.darkgreen
+            payment_text = "✓ PAID"
+            if payment_method:
+                payment_text += f" ({payment_method.upper()})"
+            if payment_date:
+                payment_text += f" on {payment_date[:10]}"
+        else:
+            payment_color = colors.red
+            payment_text = "⚠ UNPAID - Payment Pending"
+
+        payment_style = ParagraphStyle(
+            'PaymentStatus',
+            parent=self.styles['Normal'],
+            fontSize=14,
+            fontName='Helvetica-Bold',
+            textColor=payment_color,
+            alignment=1,  # Center alignment
+            spaceAfter=20,
+            borderWidth=2,
+            borderColor=payment_color,
+            borderPadding=10
+        )
+
+        payment_para = Paragraph(payment_text, payment_style)
+        story.append(payment_para)
+        story.append(Spacer(1, 20))
 
         # Footer
         footer_style = ParagraphStyle(

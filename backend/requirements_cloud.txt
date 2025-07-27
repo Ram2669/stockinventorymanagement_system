@@ -1,0 +1,42 @@
+# Cloud Backend Requirements for SRI LAKSHMI ENTERPRISES
+# Optimized for free cloud hosting services
+
+# Core Flask Framework
+Flask==2.3.3
+Flask-CORS==4.0.0
+
+# Database - PostgreSQL for cloud deployment
+psycopg2-binary==2.9.7
+SQLAlchemy==2.0.21
+Flask-SQLAlchemy==3.0.5
+
+# PDF Generation
+reportlab==4.0.4
+
+# Environment Management
+python-dotenv==1.0.0
+
+# Production Server
+gunicorn==21.2.0
+
+# Cloud Platform Support
+# For Railway/Render deployment
+whitenoise==6.5.0
+
+# For Vercel deployment (optional)
+# vercel==0.1.0
+
+# Database URL parsing
+dj-database-url==2.1.0
+
+# Security
+Werkzeug==2.3.7
+
+# Date/Time handling
+python-dateutil==2.8.2
+
+# JSON handling
+simplejson==3.19.1
+
+# HTTP requests (for health checks)
+requests==2.31.0
