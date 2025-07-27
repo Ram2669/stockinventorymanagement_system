@@ -9,11 +9,18 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function checkAuthentication() {
+    // Check if user was logged out
+    if (localStorage.getItem('logged_out') === 'true') {
+        localStorage.removeItem('logged_out');
+        window.location.replace('login.html');
+        return;
+    }
+
     const sessionToken = localStorage.getItem('session_token');
     const userData = localStorage.getItem('user_data');
-    
+
     if (!sessionToken || !userData) {
-        window.location.href = 'login.html';
+        window.location.replace('login.html');
         return;
     }
     
@@ -378,10 +385,13 @@ function logout() {
     localStorage.removeItem('user_data');
     sessionStorage.clear();
 
+    // Set a logout flag
+    localStorage.setItem('logged_out', 'true');
+
     console.log('Session data cleared, redirecting...');
 
-    // Simple redirect
-    window.location.href = 'login.html';
+    // Use replace to prevent back button access
+    window.location.replace('login.html');
 }
 
 // Download weekly report by customer
@@ -427,6 +437,61 @@ async function downloadWeeklyReportByDate() {
     } catch (error) {
         console.error('Error downloading report:', error);
         alert('Error downloading weekly report');
+    }
+}
+
+// Download receipt by ID
+async function downloadReceiptById() {
+    const saleId = document.getElementById('receiptSaleId').value;
+
+    if (!saleId) {
+        alert('Please enter a sale ID');
+        return;
+    }
+
+    try {
+        const response = await axios.get(`${API_BASE}/sales/${saleId}/receipt`, {
+            responseType: 'blob'
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `receipt_${saleId}_${new Date().toISOString().split('T')[0]}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
+        alert('Receipt downloaded successfully!');
+    } catch (error) {
+        console.error('Error downloading receipt:', error);
+        alert('Error downloading receipt. Please check if the sale ID exists.');
+    }
+}
+
+// Print receipt by ID
+async function printReceiptById() {
+    const saleId = document.getElementById('receiptSaleId').value;
+
+    if (!saleId) {
+        alert('Please enter a sale ID');
+        return;
+    }
+
+    try {
+        const response = await axios.get(`${API_BASE}/sales/${saleId}/receipt`, {
+            responseType: 'blob'
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const printWindow = window.open(url);
+        printWindow.onload = function() {
+            printWindow.print();
+        };
+    } catch (error) {
+        console.error('Error printing receipt:', error);
+        alert('Error printing receipt. Please check if the sale ID exists.');
     }
 }
 

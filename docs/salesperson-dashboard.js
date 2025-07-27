@@ -10,11 +10,18 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function checkAuthentication() {
+    // Check if user was logged out
+    if (localStorage.getItem('logged_out') === 'true') {
+        localStorage.removeItem('logged_out');
+        window.location.replace('login.html');
+        return;
+    }
+
     const sessionToken = localStorage.getItem('session_token');
     const userData = localStorage.getItem('user_data');
-    
+
     if (!sessionToken || !userData) {
-        window.location.href = 'login.html';
+        window.location.replace('login.html');
         return;
     }
     
@@ -131,17 +138,17 @@ function showStockAlerts() {
 }
 
 function showReceiptOptions() {
-    if (!lastSaleId) {
-        alert('No recent sale found. Please record a sale first to generate a receipt.');
-        return;
-    }
-
-    // Show the sale success modal with receipt options
+    // Show receipt input modal
     document.getElementById('saleDetails').innerHTML = `
-        <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
-            <h4 style="color: #2e7d32; margin: 0 0 10px 0;">Receipt Options</h4>
-            <p style="margin: 0;">Receipt for Sale ID: ${lastSaleId}</p>
-            <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #666;">Choose download or print option below</p>
+        <div style="background: #e8f5e8; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+            <h4 style="color: #2e7d32; margin: 0 0 15px 0;">📄 Receipt Generator</h4>
+            <div style="margin-bottom: 15px;">
+                <label for="receiptSaleIdInput" style="display: block; margin-bottom: 5px; font-weight: bold; color: #2e7d32;">Enter Sale ID:</label>
+                <input type="number" id="receiptSaleIdInput" placeholder="Enter sale ID (e.g., 1, 2, 3...)"
+                       style="width: 80%; padding: 10px; border: 2px solid #32CD32; border-radius: 5px; font-size: 16px; text-align: center;"
+                       value="${lastSaleId || ''}">
+            </div>
+            <p style="margin: 0; font-size: 0.9em; color: #666;">Enter any sale ID to download or print its receipt</p>
         </div>
     `;
 
@@ -257,10 +264,13 @@ function logout() {
     localStorage.removeItem('user_data');
     sessionStorage.clear();
 
+    // Set a logout flag
+    localStorage.setItem('logged_out', 'true');
+
     console.log('Session data cleared, redirecting...');
 
-    // Simple redirect
-    window.location.href = 'login.html';
+    // Use replace to prevent back button access
+    window.location.replace('login.html');
 }
 
 // Show sale success modal
@@ -291,20 +301,24 @@ function closeSaleSuccessModal() {
 
 // Download receipt
 async function downloadReceipt() {
-    if (!lastSaleId) {
-        alert('No sale ID available for receipt');
+    // Try to get sale ID from input field first, then fallback to lastSaleId
+    const inputElement = document.getElementById('receiptSaleIdInput');
+    const saleId = inputElement ? inputElement.value : lastSaleId;
+
+    if (!saleId) {
+        alert('Please enter a sale ID or record a sale first');
         return;
     }
 
     try {
-        const response = await axios.get(`${API_BASE}/sales/${lastSaleId}/receipt`, {
+        const response = await axios.get(`${API_BASE}/sales/${saleId}/receipt`, {
             responseType: 'blob'
         });
 
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', `receipt_${lastSaleId}_${new Date().toISOString().split('T')[0]}.pdf`);
+        link.setAttribute('download', `receipt_${saleId}_${new Date().toISOString().split('T')[0]}.pdf`);
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -313,19 +327,23 @@ async function downloadReceipt() {
         alert('Receipt downloaded successfully!');
     } catch (error) {
         console.error('Error downloading receipt:', error);
-        alert('Error downloading receipt');
+        alert('Error downloading receipt. Please check if the sale ID exists.');
     }
 }
 
 // Print receipt
 async function printReceipt() {
-    if (!lastSaleId) {
-        alert('No sale ID available for receipt');
+    // Try to get sale ID from input field first, then fallback to lastSaleId
+    const inputElement = document.getElementById('receiptSaleIdInput');
+    const saleId = inputElement ? inputElement.value : lastSaleId;
+
+    if (!saleId) {
+        alert('Please enter a sale ID or record a sale first');
         return;
     }
 
     try {
-        const response = await axios.get(`${API_BASE}/sales/${lastSaleId}/receipt`, {
+        const response = await axios.get(`${API_BASE}/sales/${saleId}/receipt`, {
             responseType: 'blob'
         });
 
@@ -336,7 +354,7 @@ async function printReceipt() {
         };
     } catch (error) {
         console.error('Error printing receipt:', error);
-        alert('Error printing receipt');
+        alert('Error printing receipt. Please check if the sale ID exists.');
     }
 }
 

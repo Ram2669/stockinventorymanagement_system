@@ -329,13 +329,27 @@
             </div>
         </div>
 
-        <!-- Weekly Reports Section -->
+        <!-- Receipt & Reports Section -->
         <div class="analytics-section">
             <div class="analytics-header">
-                <h2><i class="fas fa-file-pdf"></i> Weekly Reports</h2>
+                <h2><i class="fas fa-file-pdf"></i> Reports & Receipts</h2>
             </div>
 
             <div class="analytics-grid">
+                <div class="analytics-card">
+                    <h3><i class="fas fa-receipt"></i> Receipt Generator</h3>
+                    <div style="margin-bottom: 15px;">
+                        <label for="receiptSaleId" style="display: block; margin-bottom: 5px; font-weight: bold;">Enter Sale ID:</label>
+                        <input type="number" id="receiptSaleId" placeholder="Enter sale ID" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px;">
+                    </div>
+                    <button class="btn btn-primary" onclick="downloadReceiptById()" style="width: 100%; margin-bottom: 5px;">
+                        <i class="fas fa-download"></i> Download Receipt
+                    </button>
+                    <button class="btn btn-success" onclick="printReceiptById()" style="width: 100%;">
+                        <i class="fas fa-print"></i> Print Receipt
+                    </button>
+                </div>
+
                 <div class="analytics-card">
                     <h3><i class="fas fa-users"></i> Customer Reports</h3>
                     <button class="btn btn-primary" onclick="downloadWeeklyReportByCustomer()" style="width: 100%; margin-bottom: 10px;">
