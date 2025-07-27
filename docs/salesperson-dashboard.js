@@ -1,13 +1,173 @@
+// EMERGENCY CLEAN START
+console.log('🚨 EMERGENCY: Starting clean JavaScript...');
+
 // Global variables
 let currentUser = null;
 let stockData = [];
 let lastSaleId = null;
 let allProducts = [];
 
-// EMERGENCY DEBUG
-console.log('🚨 EMERGENCY: Salesperson dashboard JavaScript loaded!');
-console.log('🚨 API_BASE:', typeof API_BASE !== 'undefined' ? API_BASE : 'UNDEFINED');
-console.log('🚨 axios available:', typeof axios !== 'undefined');
+// Check if required libraries are loaded
+if (typeof axios === 'undefined') {
+    console.error('❌ AXIOS NOT LOADED!');
+    alert('❌ CRITICAL ERROR: axios library not loaded!');
+}
+
+if (typeof API_BASE === 'undefined') {
+    console.error('❌ API_BASE NOT DEFINED!');
+    window.API_BASE = 'http://localhost:5001/api';
+    console.log('✅ Set API_BASE to:', API_BASE);
+}
+
+console.log('✅ Emergency JavaScript initialized successfully!');
+
+// EMERGENCY SIMPLE FUNCTIONS
+function emergencyTestSale() {
+    console.log('🚨 Emergency test button clicked!');
+    alert('🚨 EMERGENCY TEST CLICKED!\nThis confirms JavaScript is working.\nNow testing API...');
+
+    // Test API connection
+    axios.get(API_BASE + '/stock')
+        .then(response => {
+            console.log('✅ API connection successful:', response.data);
+            alert('✅ API CONNECTION WORKING!\nFound ' + response.data.length + ' products in stock.');
+
+            // Try to record a test sale
+            if (response.data.length > 0) {
+                const testProduct = response.data[0];
+                const saleData = {
+                    product_name: testProduct.product_name,
+                    company_name: testProduct.company_name,
+                    customer_name: 'EMERGENCY TEST',
+                    quantity_sold: 1,
+                    unit_price: testProduct.unit_price || 100,
+                    payment_status: 'paid',
+                    payment_method: 'cash'
+                };
+
+                console.log('🚨 Recording test sale:', saleData);
+
+                axios.post(API_BASE + '/sales', saleData)
+                    .then(saleResponse => {
+                        console.log('✅ SALE RECORDED!', saleResponse.data);
+                        alert('✅ EMERGENCY TEST SUCCESSFUL!\nSale ID: ' + saleResponse.data.sale_id + '\nAmount: Rs.' + saleResponse.data.sale_amount);
+                        location.reload(); // Refresh page
+                    })
+                    .catch(saleError => {
+                        console.error('❌ Sale recording failed:', saleError);
+                        alert('❌ SALE RECORDING FAILED!\n' + (saleError.response?.data?.error || saleError.message));
+                    });
+            }
+        })
+        .catch(error => {
+            console.error('❌ API connection failed:', error);
+            alert('❌ API CONNECTION FAILED!\nError: ' + error.message + '\nMake sure backend server is running on localhost:5001');
+        });
+}
+
+function showRecordSale() {
+    console.log('🚨 Record Sale button clicked!');
+    alert('🚨 RECORD SALE CLICKED!\nThis confirms the button is working.\nOpening modal...');
+
+    const modal = document.getElementById('recordSaleModal');
+    if (modal) {
+        modal.style.display = 'block';
+        console.log('✅ Modal opened');
+    } else {
+        console.error('❌ Modal not found!');
+        alert('❌ ERROR: Record Sale modal not found in HTML!');
+    }
+}
+
+function closeRecordSaleModal() {
+    console.log('🚨 Closing modal...');
+    const modal = document.getElementById('recordSaleModal');
+    if (modal) {
+        modal.style.display = 'none';
+        console.log('✅ Modal closed');
+    }
+}
+
+// EMERGENCY SIMPLE FORM HANDLER
+function handleSaleSubmission() {
+    console.log('🚨 Form submission started...');
+
+    try {
+        // Get form values
+        const productSearch = document.getElementById('productSearch')?.value || '';
+        const customerName = document.getElementById('customer_name')?.value || '';
+        const quantity = document.getElementById('quantity_sold')?.value || '';
+        const paymentStatus = document.getElementById('payment_status')?.value || 'unpaid';
+        const paymentMethod = document.getElementById('payment_method')?.value || 'cash';
+
+        console.log('Form values:', { productSearch, customerName, quantity, paymentStatus, paymentMethod });
+
+        // Basic validation
+        if (!productSearch.trim()) {
+            alert('❌ Please enter a product name!');
+            return;
+        }
+        if (!customerName.trim()) {
+            alert('❌ Please enter customer name!');
+            return;
+        }
+        if (!quantity || quantity <= 0) {
+            alert('❌ Please enter a valid quantity!');
+            return;
+        }
+
+        // Create sale data with default values
+        const saleData = {
+            product_name: productSearch.trim(),
+            company_name: 'Default Company', // Default if not specified
+            customer_name: customerName.trim(),
+            quantity_sold: parseInt(quantity),
+            unit_price: 100, // Default price
+            payment_status: paymentStatus,
+            payment_method: paymentMethod
+        };
+
+        console.log('🚨 Submitting sale:', saleData);
+        alert('🚨 SUBMITTING SALE...\nProduct: ' + saleData.product_name + '\nCustomer: ' + saleData.customer_name + '\nQuantity: ' + saleData.quantity_sold);
+
+        // Submit to API
+        axios.post(API_BASE + '/sales', saleData)
+            .then(response => {
+                console.log('✅ SALE SUCCESSFUL!', response.data);
+                alert('✅ SALE RECORDED SUCCESSFULLY!\nSale ID: ' + response.data.sale_id + '\nAmount: Rs.' + response.data.sale_amount);
+                closeRecordSaleModal();
+                location.reload(); // Refresh page
+            })
+            .catch(error => {
+                console.error('❌ Sale failed:', error);
+                alert('❌ SALE FAILED!\nError: ' + (error.response?.data?.error || error.message));
+            });
+
+    } catch (error) {
+        console.error('❌ Form handling error:', error);
+        alert('❌ FORM ERROR!\nError: ' + error.message);
+    }
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚨 DOM loaded, initializing...');
+
+    // Add form submission handler
+    const form = document.getElementById('recordSaleForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('🚨 Form submitted!');
+            handleSaleSubmission();
+        });
+        console.log('✅ Form handler attached');
+    } else {
+        console.error('❌ Form not found!');
+    }
+
+    console.log('✅ Emergency initialization complete!');
+});
 
 // Check authentication on page load
 window.addEventListener('DOMContentLoaded', async () => {
