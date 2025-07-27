@@ -368,14 +368,9 @@ document.getElementById('recordSaleForm').addEventListener('submit', async (e) =
         // Close record sale modal FIRST
         closeRecordSaleModal();
 
-        // Show success message immediately
-        showMessage(`Sale recorded successfully! Sale ID: ${response.data.sale_id}`, 'success');
-
-        // Show success modal with sale details AFTER a short delay
-        setTimeout(() => {
-            console.log('About to show success modal...');
-            showSaleSuccessModal(response.data);
-        }, 500);
+        // Show success modal with sale details immediately
+        console.log('About to show success modal...');
+        showSaleSuccessModal(response.data);
 
         // Reload data after modal is shown
         setTimeout(() => {
@@ -478,12 +473,15 @@ function showSaleSuccessModal(saleData) {
     }
 
     saleDetails.innerHTML = `
-        <div style="background: #e8f5e8; padding: 25px; border-radius: 12px; margin-bottom: 25px; text-align: center; border: 3px solid #32CD32;">
+        <div style="background: linear-gradient(135deg, #e8f5e8, #f0f8f0); padding: 25px; border-radius: 12px; text-align: center; border: 3px solid #4CAF50;">
+            <div style="background: #4CAF50; color: white; padding: 15px; border-radius: 50%; width: 80px; height: 80px; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-check-circle" style="font-size: 2.5em;"></i>
+            </div>
             <h4 style="color: #2e7d32; margin: 0 0 20px 0; font-size: 1.5em;">🎉 Sale Recorded Successfully!</h4>
 
-            <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                <div style="background: #32CD32; color: white; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
-                    <h3 style="margin: 0; font-size: 1.3em;">📄 SALE ID: ${saleData.sale_id}</h3>
+            <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <div style="background: #4CAF50; color: white; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                    <h3 style="margin: 0; font-size: 1.2em;">📄 SALE ID: ${saleData.sale_id}</h3>
                 </div>
 
                 <div style="text-align: left; font-size: 1.1em; line-height: 1.6;">
@@ -497,11 +495,6 @@ function showSaleSuccessModal(saleData) {
                     <p><strong>💳 Payment Status:</strong> ${saleData.payment_status === 'paid' ? '✅ Paid' : '💰 Unpaid'}</p>
                     ${saleData.payment_method ? `<p><strong>🏦 Payment Method:</strong> ${saleData.payment_method.toUpperCase()}</p>` : ''}
                 </div>
-            </div>
-
-            <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                <h4 style="color: #856404; margin: 0 0 10px 0;">📄 Receipt Options Available</h4>
-                <p style="color: #856404; margin: 0; font-weight: bold;">Click Download or Print below to get your receipt!</p>
             </div>
         </div>
     `;
@@ -520,23 +513,7 @@ function closeSaleSuccessModal() {
     document.getElementById('saleSuccessModal').style.display = 'none';
 }
 
-// Test function to manually trigger success modal
-function testSuccessModal() {
-    const testData = {
-        sale_id: 999,
-        customer_name: "Test Customer",
-        product_name: "Test Product",
-        company_name: "Test Company",
-        quantity_sold: 10,
-        unit_price: 100,
-        sale_amount: 1000,
-        payment_status: "paid",
-        payment_method: "cash"
-    };
 
-    console.log('Testing success modal with data:', testData);
-    showSaleSuccessModal(testData);
-}
 
 // Fix the function name for the Record Sale button
 function showRecordSale() {
@@ -561,11 +538,28 @@ function closeRecordSaleModal() {
 
 // Show receipt options (for the Download Receipt button)
 function showReceiptOptions() {
-    const saleId = prompt('Enter Sale ID to download receipt:');
-    if (saleId) {
-        lastSaleId = saleId;
-        downloadReceipt();
-    }
+    // Show receipt input modal with better UI
+    document.getElementById('saleDetails').innerHTML = `
+        <div style="background: linear-gradient(135deg, #e8f5e8, #f0f8f0); padding: 25px; border-radius: 12px; margin-bottom: 20px; text-align: center; border: 3px solid #4CAF50;">
+            <div style="background: #4CAF50; color: white; padding: 15px; border-radius: 50%; width: 80px; height: 80px; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-file-pdf" style="font-size: 2.5em;"></i>
+            </div>
+            <h4 style="color: #2e7d32; margin: 0 0 15px 0; font-size: 1.4em;">📄 Receipt Generator</h4>
+            <p style="color: #2e7d32; margin-bottom: 20px; font-size: 1.1em;">Enter any Sale ID to download or print its receipt</p>
+
+            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <label for="receiptSaleIdInput" style="display: block; margin-bottom: 10px; font-weight: bold; color: #2e7d32; font-size: 1.1em;">Sale ID:</label>
+                <input type="number" id="receiptSaleIdInput" placeholder="Enter sale ID (e.g., 1, 2, 3...)"
+                       style="width: 80%; padding: 15px; border: 2px solid #4CAF50; border-radius: 8px; font-size: 18px; text-align: center; margin-bottom: 15px;"
+                       value="${lastSaleId || ''}">
+                <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 10px; border-radius: 5px; margin-top: 10px;">
+                    <small style="color: #856404;">💡 Tip: The last recorded sale ID is automatically filled</small>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('saleSuccessModal').style.display = 'block';
 }
 
 // Download receipt
