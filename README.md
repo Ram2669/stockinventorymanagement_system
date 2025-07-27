@@ -42,41 +42,28 @@ The system features a beautiful agricultural theme with:
 
 ## 🚀 Quick Start (Choose Your Platform)
 
-### Windows Users:
+### **🔥 New! Automated Setup Scripts**
+
+#### **Windows Users:**
 ```cmd
-# 1. Run setup
-setup_windows.bat
-
-# 2. Setup database
-setup_database_windows.bat
-
-# 3. Start server
-start_server_windows.bat
+git clone https://github.com/Ram2669/stockinventorymanagement_system.git
+cd stockinventorymanagement_system
+setup.bat
 ```
 
-### macOS Users:
+#### **Linux/macOS Users:**
 ```bash
-# 1. Run setup
-./setup_database.sh
-
-# 2. Start system
-./quick_start.sh
+git clone https://github.com/Ram2669/stockinventorymanagement_system.git
+cd stockinventorymanagement_system
+chmod +x setup.sh
+./setup.sh
 ```
 
-### Linux/Ubuntu Users:
-```bash
-# 1. Run setup
-./setup_linux.sh
+### **📖 Setup Guides**
 
-# 2. Setup database
-./setup_database_linux.sh
-
-# 3. Start server
-./start_server_linux.sh
-```
-
-### Manual Setup (All Platforms):
-See the complete [COMPLETE_SETUP_GUIDE.md](COMPLETE_SETUP_GUIDE.md) for detailed instructions.
+- **📋 [SETUP_GUIDE.md](SETUP_GUIDE.md)** - Complete step-by-step setup for new machines
+- **⚡ [QUICK_START.md](QUICK_START.md)** - Quick setup for experienced users
+- **🔧 Automated Scripts**: `setup.sh` (Linux/macOS) or `setup.bat` (Windows)
 
 ## 📁 Project Structure
 
@@ -185,26 +172,24 @@ PRODUCTION_API_URL: 'http://YOUR_LOCAL_IP:5000/api'
 
 ## 📖 Documentation
 
-- [COMPLETE_SETUP_GUIDE.md](COMPLETE_SETUP_GUIDE.md) - Complete setup instructions for any system
-- [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) - Original deployment guide
-- [API Documentation](#api-endpoints) - API endpoint details
-- [Database Schema](#database-schema) - Database structure
+- **📋 [SETUP_GUIDE.md](SETUP_GUIDE.md)** - Complete setup instructions with PostgreSQL
+- **⚡ [QUICK_START.md](QUICK_START.md)** - Quick setup for experienced users
+- **🗄️ [database_setup.sql](database_setup.sql)** - Database schema and tables
+- **⚙️ [requirements.txt](requirements.txt)** - Python dependencies
 
 ## 📁 Setup Scripts
 
-### Windows:
-- `setup_windows.bat` - Initial setup for Windows
-- `setup_database_windows.bat` - Database setup for Windows
-- `start_server_windows.bat` - Start server on Windows
+### **Cross-Platform:**
+- **`setup.sh`** - Automated setup for Linux/macOS
+- **`setup.bat`** - Automated setup for Windows
+- **`.env`** - Database configuration (auto-created)
 
-### Linux/Ubuntu:
-- `setup_linux.sh` - Initial setup for Linux
-- `setup_database_linux.sh` - Database setup for Linux
-- `start_server_linux.sh` - Start server on Linux
-
-### macOS:
-- `setup_database.sh` - Database setup for macOS
-- `quick_start.sh` - Quick start for macOS
+### **Key Features:**
+- ✅ **Automatic virtual environment creation**
+- ✅ **Dependency installation**
+- ✅ **Configuration file generation**
+- ✅ **PostgreSQL compatibility check**
+- ✅ **Cross-platform support**
 
 ## 🤝 Contributing
 
