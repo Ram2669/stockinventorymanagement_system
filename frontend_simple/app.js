@@ -29,6 +29,9 @@ function setupEventListeners() {
     // Auto-calculate total amount when quantity or unit price changes
     document.getElementById('quantitySold').addEventListener('input', calculateTotalAmount);
     document.getElementById('unitPrice').addEventListener('input', calculateTotalAmount);
+
+    // Show/hide payment method based on payment status
+    document.getElementById('paymentStatus').addEventListener('change', handlePaymentStatusChange);
 }
 
 // Tab switching with enhanced animations
@@ -82,7 +85,7 @@ function showTab(tabName) {
 // Load initial data
 async function loadData() {
     try {
-        await Promise.all([loadStocks(), loadSales()]);
+        await Promise.all([loadStocks(), loadSales(), loadPaymentData()]);
         updateDashboard();
         updateStockList();
         updateProductSelect();
@@ -146,6 +149,21 @@ function calculateTotalAmount() {
     document.getElementById('totalAmount').value = totalAmount.toFixed(2);
 }
 
+// Handle payment status change
+function handlePaymentStatusChange() {
+    const paymentStatus = document.getElementById('paymentStatus').value;
+    const paymentMethodGroup = document.getElementById('paymentMethodGroup');
+
+    if (paymentStatus === 'paid') {
+        paymentMethodGroup.style.display = 'block';
+        document.getElementById('paymentMethod').required = true;
+    } else {
+        paymentMethodGroup.style.display = 'none';
+        document.getElementById('paymentMethod').required = false;
+        document.getElementById('paymentMethod').value = '';
+    }
+}
+
 // Handle sales form submission
 async function handleSalesSubmit(e) {
     e.preventDefault();
@@ -170,7 +188,9 @@ async function handleSalesSubmit(e) {
         company_name: selectedStock.company_name,
         quantity_sold: quantitySold,
         customer_name: document.getElementById('customerName').value,
-        unit_price: unitPrice
+        unit_price: unitPrice,
+        payment_status: document.getElementById('paymentStatus').value,
+        payment_method: document.getElementById('paymentMethod').value || null
     };
     
     try {
@@ -697,5 +717,127 @@ window.onclick = function(event) {
     const modal = document.getElementById('saleSuccessModal');
     if (event.target === modal) {
         closeSaleModal();
+    }
+}
+
+// Load payment data
+async function loadPaymentData() {
+    try {
+        const [paidResponse, unpaidResponse, summaryResponse] = await Promise.all([
+            axios.get(`${API_BASE}/sales/paid`),
+            axios.get(`${API_BASE}/sales/unpaid`),
+            axios.get(`${API_BASE}/sales/payment-summary`)
+        ]);
+
+        window.paidSales = paidResponse.data;
+        window.unpaidSales = unpaidResponse.data;
+        window.paymentSummary = summaryResponse.data;
+
+        updatePaymentTables();
+        updatePaymentSummary();
+    } catch (error) {
+        console.error('Error loading payment data:', error);
+        showToast('Error loading payment data', 'error');
+    }
+}
+
+// Update payment summary cards
+function updatePaymentSummary() {
+    if (!window.paymentSummary) return;
+
+    const summary = window.paymentSummary;
+
+    document.getElementById('paidAmount').textContent = `Rs.${summary.paid_amount.toFixed(2)}`;
+    document.getElementById('paidCount').textContent = `${summary.paid_count} transactions`;
+
+    document.getElementById('unpaidAmount').textContent = `Rs.${summary.unpaid_amount.toFixed(2)}`;
+    document.getElementById('unpaidCount').textContent = `${summary.unpaid_count} transactions`;
+
+    document.getElementById('paymentPercentage').textContent = `${summary.payment_percentage.toFixed(1)}%`;
+}
+
+// Update payment tables
+function updatePaymentTables() {
+    updatePaidSalesTable();
+    updateUnpaidSalesTable();
+}
+
+// Update paid sales table
+function updatePaidSalesTable() {
+    const tbody = document.querySelector('#paidSalesTable tbody');
+    tbody.innerHTML = '';
+
+    if (!window.paidSales || window.paidSales.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #666;">No paid sales found</td></tr>';
+        return;
+    }
+
+    window.paidSales.forEach(sale => {
+        const row = document.createElement('tr');
+        const paymentDate = sale.payment_date ? new Date(sale.payment_date).toLocaleDateString() : 'N/A';
+
+        row.innerHTML = `
+            <td>${new Date(sale.sale_date).toLocaleDateString()}</td>
+            <td>${sale.customer_name}</td>
+            <td>${sale.product_name}</td>
+            <td>${sale.quantity_sold}</td>
+            <td>Rs.${sale.unit_price.toFixed(2)}</td>
+            <td style="font-weight: bold; color: #28a745;">Rs.${sale.sale_amount.toFixed(2)}</td>
+            <td><span class="payment-method">${sale.payment_method ? sale.payment_method.toUpperCase() : 'N/A'}</span></td>
+            <td>${paymentDate}</td>
+            <td><button class="btn btn-sm btn-primary" onclick="downloadReceipt(${sale.id})">📄 Receipt</button></td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Update unpaid sales table
+function updateUnpaidSalesTable() {
+    const tbody = document.querySelector('#unpaidSalesTable tbody');
+    tbody.innerHTML = '';
+
+    if (!window.unpaidSales || window.unpaidSales.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #666;">No unpaid sales found</td></tr>';
+        return;
+    }
+
+    window.unpaidSales.forEach(sale => {
+        const row = document.createElement('tr');
+        const saleDate = new Date(sale.sale_date);
+        const daysPending = Math.floor((new Date() - saleDate) / (1000 * 60 * 60 * 24));
+
+        row.innerHTML = `
+            <td>${saleDate.toLocaleDateString()}</td>
+            <td>${sale.customer_name}</td>
+            <td>${sale.product_name}</td>
+            <td>${sale.quantity_sold}</td>
+            <td>Rs.${sale.unit_price.toFixed(2)}</td>
+            <td style="font-weight: bold; color: #dc3545;">Rs.${sale.sale_amount.toFixed(2)}</td>
+            <td><span class="days-pending">${daysPending} days</span></td>
+            <td>
+                <button class="btn btn-sm btn-success" onclick="markAsPaid(${sale.id})">✅ Mark Paid</button>
+            </td>
+            <td><button class="btn btn-sm btn-primary" onclick="downloadReceipt(${sale.id})">📄 Receipt</button></td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Mark sale as paid
+async function markAsPaid(saleId) {
+    const paymentMethod = prompt('Payment method (cash/card/upi/bank_transfer/cheque):');
+    if (!paymentMethod) return;
+
+    try {
+        await axios.put(`${API_BASE}/sales/${saleId}/payment`, {
+            payment_status: 'paid',
+            payment_method: paymentMethod.toLowerCase()
+        });
+
+        showToast('Payment status updated successfully!', 'success');
+        await loadPaymentData(); // Reload payment data
+    } catch (error) {
+        console.error('Error updating payment status:', error);
+        showToast('Error updating payment status', 'error');
     }
 }
