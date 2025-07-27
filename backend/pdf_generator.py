@@ -60,42 +60,91 @@ class PDFGenerator:
             story.append(customer_header)
             story.append(Spacer(1, 10))
             
-            # Table data
-            data = [['Date', 'Product Name', 'Company', 'Qty', 'Unit Price', 'Amount (Rs.)']]
+            # Table data with payment status
+            data = [['Date', 'Product Name', 'Company', 'Qty', 'Unit Price', 'Amount (Rs.)', 'Payment Status']]
             total_amount = 0
+            paid_amount = 0
+            unpaid_amount = 0
 
             for sale in customer_sale_list:
+                payment_status = "✓ PAID" if sale.payment_status == 'paid' else "⚠ UNPAID"
+                payment_method = f" ({sale.payment_method.upper()})" if sale.payment_method else ""
+
                 data.append([
                     sale.sale_date.strftime('%Y-%m-%d'),
                     sale.product_name,
                     sale.company_name,
                     str(sale.quantity_sold),
                     f"Rs.{sale.unit_price:.2f}",
-                    f"Rs.{sale.sale_amount:.2f}"
+                    f"Rs.{sale.sale_amount:.2f}",
+                    payment_status + payment_method
                 ])
+
                 total_amount += sale.sale_amount
+                if sale.payment_status == 'paid':
+                    paid_amount += sale.sale_amount
+                else:
+                    unpaid_amount += sale.sale_amount
 
-            # Add total row
-            data.append(['', '', '', '', 'Total:', f"Rs.{total_amount:.2f}"])
+            # Add summary rows
+            data.append(['', '', '', '', '', 'Total:', f"Rs.{total_amount:.2f}"])
+            data.append(['', '', '', '', '', 'Paid:', f"Rs.{paid_amount:.2f}"])
+            data.append(['', '', '', '', '', 'Unpaid:', f"Rs.{unpaid_amount:.2f}"])
 
-            # Create table
-            table = Table(data, colWidths=[1*inch, 1.8*inch, 1.2*inch, 0.6*inch, 1*inch, 1.4*inch])
+            # Create table with payment status column
+            table = Table(data, colWidths=[0.8*inch, 1.5*inch, 1*inch, 0.5*inch, 0.8*inch, 1*inch, 1.4*inch])
             table.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 12),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
                 ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -2), colors.beige),
-                ('BACKGROUND', (0, -1), (-1, -1), colors.lightgrey),
-                ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+                ('BACKGROUND', (0, 1), (-1, -4), colors.beige),
+                ('BACKGROUND', (0, -3), (-1, -1), colors.lightgrey),
+                ('FONTNAME', (0, -3), (-1, -1), 'Helvetica-Bold'),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ('FONTSIZE', (0, 1), (-1, -1), 9)
             ]))
             
             story.append(table)
             story.append(Spacer(1, 20))
-        
+
+        # Add overall payment summary
+        if sales:
+            story.append(Spacer(1, 30))
+            summary_header = Paragraph("📊 Weekly Payment Summary", self.styles['Heading2'])
+            story.append(summary_header)
+            story.append(Spacer(1, 15))
+
+            # Calculate overall totals
+            overall_total = sum(sale.sale_amount for sale in sales)
+            overall_paid = sum(sale.sale_amount for sale in sales if sale.payment_status == 'paid')
+            overall_unpaid = overall_total - overall_paid
+            payment_rate = (overall_paid / overall_total * 100) if overall_total > 0 else 0
+
+            summary_data = [
+                ['Metric', 'Amount', 'Percentage'],
+                ['Total Sales', f"Rs.{overall_total:.2f}", '100%'],
+                ['Paid Amount', f"Rs.{overall_paid:.2f}", f"{payment_rate:.1f}%"],
+                ['Unpaid Amount', f"Rs.{overall_unpaid:.2f}", f"{100-payment_rate:.1f}%"]
+            ]
+
+            summary_table = Table(summary_data, colWidths=[2*inch, 2*inch, 2*inch])
+            summary_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.darkgreen),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 12),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.lightgreen),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica-Bold'),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ]))
+
+            story.append(summary_table)
+
         doc.build(story)
         buffer.seek(0)
         return buffer
@@ -141,42 +190,91 @@ class PDFGenerator:
             story.append(date_header)
             story.append(Spacer(1, 10))
             
-            # Table data
-            data = [['Customer Name', 'Product Name', 'Company', 'Qty', 'Unit Price', 'Amount (Rs.)']]
+            # Table data with payment status
+            data = [['Customer Name', 'Product Name', 'Company', 'Qty', 'Unit Price', 'Amount (Rs.)', 'Payment Status']]
             total_amount = 0
+            paid_amount = 0
+            unpaid_amount = 0
 
             for sale in date_sale_list:
+                payment_status = "✓ PAID" if sale.payment_status == 'paid' else "⚠ UNPAID"
+                payment_method = f" ({sale.payment_method.upper()})" if sale.payment_method else ""
+
                 data.append([
                     sale.customer_name,
                     sale.product_name,
                     sale.company_name,
                     str(sale.quantity_sold),
                     f"Rs.{sale.unit_price:.2f}",
-                    f"Rs.{sale.sale_amount:.2f}"
+                    f"Rs.{sale.sale_amount:.2f}",
+                    payment_status + payment_method
                 ])
+
                 total_amount += sale.sale_amount
+                if sale.payment_status == 'paid':
+                    paid_amount += sale.sale_amount
+                else:
+                    unpaid_amount += sale.sale_amount
 
-            # Add total row
-            data.append(['', '', '', '', 'Total:', f"Rs.{total_amount:.2f}"])
+            # Add summary rows
+            data.append(['', '', '', '', '', 'Total:', f"Rs.{total_amount:.2f}"])
+            data.append(['', '', '', '', '', 'Paid:', f"Rs.{paid_amount:.2f}"])
+            data.append(['', '', '', '', '', 'Unpaid:', f"Rs.{unpaid_amount:.2f}"])
 
-            # Create table
-            table = Table(data, colWidths=[1.3*inch, 1.7*inch, 1.2*inch, 0.6*inch, 1*inch, 1.2*inch])
+            # Create table with payment status column
+            table = Table(data, colWidths=[1*inch, 1.4*inch, 1*inch, 0.5*inch, 0.8*inch, 1*inch, 1.3*inch])
             table.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, 0), 12),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
                 ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -2), colors.beige),
-                ('BACKGROUND', (0, -1), (-1, -1), colors.lightgrey),
-                ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+                ('BACKGROUND', (0, 1), (-1, -4), colors.beige),
+                ('BACKGROUND', (0, -3), (-1, -1), colors.lightgrey),
+                ('FONTNAME', (0, -3), (-1, -1), 'Helvetica-Bold'),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ('FONTSIZE', (0, 1), (-1, -1), 9)
             ]))
             
             story.append(table)
             story.append(Spacer(1, 20))
-        
+
+        # Add overall payment summary
+        if sales:
+            story.append(Spacer(1, 30))
+            summary_header = Paragraph("📊 Weekly Payment Summary", self.styles['Heading2'])
+            story.append(summary_header)
+            story.append(Spacer(1, 15))
+
+            # Calculate overall totals
+            overall_total = sum(sale.sale_amount for sale in sales)
+            overall_paid = sum(sale.sale_amount for sale in sales if sale.payment_status == 'paid')
+            overall_unpaid = overall_total - overall_paid
+            payment_rate = (overall_paid / overall_total * 100) if overall_total > 0 else 0
+
+            summary_data = [
+                ['Metric', 'Amount', 'Percentage'],
+                ['Total Sales', f"Rs.{overall_total:.2f}", '100%'],
+                ['Paid Amount', f"Rs.{overall_paid:.2f}", f"{payment_rate:.1f}%"],
+                ['Unpaid Amount', f"Rs.{overall_unpaid:.2f}", f"{100-payment_rate:.1f}%"]
+            ]
+
+            summary_table = Table(summary_data, colWidths=[2*inch, 2*inch, 2*inch])
+            summary_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.darkgreen),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 12),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.lightgreen),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica-Bold'),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ]))
+
+            story.append(summary_table)
+
         doc.build(story)
         buffer.seek(0)
         return buffer
