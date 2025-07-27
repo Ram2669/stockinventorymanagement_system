@@ -246,12 +246,32 @@
         window.addEventListener('DOMContentLoaded', async () => {
             try {
                 const response = await axios.get(`${API_BASE}/auth/check-admin-exists`);
+                const registerLink = document.querySelector('.register-link');
+
                 if (response.data.admin_exists) {
-                    // Admin exists, show normal login
-                    document.querySelector('.register-link').style.display = 'none';
+                    // Admin exists, hide registration option
+                    if (registerLink) {
+                        registerLink.style.display = 'none';
+                    }
+                } else {
+                    // No admin exists, show registration option prominently
+                    if (registerLink) {
+                        registerLink.style.display = 'inline';
+                        registerLink.style.background = '#32CD32';
+                        registerLink.style.color = 'white';
+                        registerLink.style.padding = '10px 20px';
+                        registerLink.style.borderRadius = '5px';
+                        registerLink.style.textDecoration = 'none';
+                        registerLink.innerHTML = '🔐 Register First Admin (Required)';
+                    }
                 }
             } catch (error) {
                 console.error('Error checking admin status:', error);
+                // If API fails, show registration option
+                const registerLink = document.querySelector('.register-link');
+                if (registerLink) {
+                    registerLink.style.display = 'inline';
+                }
             }
         });
 

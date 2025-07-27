@@ -17,6 +17,12 @@
 <body>
     <div class="container">
         <div class="header">
+            <div class="user-info" id="userInfo" style="position: absolute; top: 20px; right: 20px; color: white;">
+                <span id="welcomeUser"></span>
+                <button onclick="logout()" style="margin-left: 15px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 5px; cursor: pointer;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
             <h1>🌾 SRI LAKSHMI ENTERPRISES 🌾</h1>
             <p>Agricultural Stock Management System</p>
         </div>
@@ -81,7 +87,7 @@
                 <h2><i class="fas fa-search"></i> 🌱 Product Search</h2>
                 <div class="search-container">
                     <div class="search-box">
-                        <input type="text" id="searchInput" placeholder="Search by product name, company, or any keyword..."
+                        <input type="text" id="searchInput" placeholder="Search by product name, company, or any keyword..." 
                                oninput="performSearch()" autocomplete="off">
                         <i class="fas fa-search search-icon"></i>
                     </div>
@@ -100,7 +106,7 @@
                         </select>
                     </div>
                 </div>
-
+                
                 <div id="searchResults">
                     <div class="search-stats">
                         <span id="searchCount">0 products found</span>
@@ -162,7 +168,7 @@
             <div class="card">
                 <h2><i class="fas fa-warehouse"></i> 📦 Current Inventory</h2>
                 <div class="search-box-small">
-                    <input type="text" id="stockSearchInput" placeholder="Search current stock..."
+                    <input type="text" id="stockSearchInput" placeholder="Search current stock..." 
                            oninput="searchStock()" autocomplete="off">
                     <i class="fas fa-search search-icon-small"></i>
                 </div>
@@ -187,6 +193,7 @@
                             <input type="text" id="customerName" required>
                         </div>
                     </div>
+                    
                     <div class="form-row">
                         <div class="form-group">
                             <label>Quantity to Sell</label>

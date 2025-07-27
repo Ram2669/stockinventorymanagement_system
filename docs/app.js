@@ -5,15 +5,78 @@ let selectedStock = null;
 let lastSaleId = null;
 let filteredStocks = [];
 let searchTimeout = null;
+let currentUser = null;
+let unpaidSales = [];
 
 // API base URL is now loaded from config.js
 // const API_BASE is available globally from config.js
 
 // Initialize the app
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    await checkAuthentication();
     loadData();
     setupEventListeners();
 });
+
+// Check authentication on page load
+async function checkAuthentication() {
+    const sessionToken = localStorage.getItem('session_token');
+    const userData = localStorage.getItem('user_data');
+
+    if (!sessionToken || !userData) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    try {
+        const response = await axios.post(`${API_BASE}/auth/verify-session`, {
+            session_token: sessionToken
+        });
+
+        currentUser = response.data.user;
+
+        // Update welcome message
+        document.getElementById('welcomeUser').textContent =
+            `Welcome, ${currentUser.full_name} (${currentUser.role.toUpperCase()})`;
+
+        // Hide tabs based on role
+        if (currentUser.role === 'salesperson') {
+            // Hide admin-only tabs
+            const adminTabs = ['dashboard', 'stock', 'reports', 'payment-tracking'];
+            adminTabs.forEach(tabId => {
+                const tabButton = document.querySelector(`[onclick="showTab('${tabId}')"]`);
+                if (tabButton) {
+                    tabButton.style.display = 'none';
+                }
+            });
+
+            // Show only sales tab for salesperson
+            showTab('sales');
+        }
+
+    } catch (error) {
+        console.error('Authentication failed:', error);
+        localStorage.removeItem('session_token');
+        localStorage.removeItem('user_data');
+        window.location.href = 'login.html';
+    }
+}
+
+// Logout function
+async function logout() {
+    try {
+        const sessionToken = localStorage.getItem('session_token');
+        if (sessionToken) {
+            await axios.post(`${API_BASE}/auth/logout`, { session_token: sessionToken });
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+    } finally {
+        localStorage.removeItem('session_token');
+        localStorage.removeItem('user_data');
+        window.location.href = 'login.html';
+    }
+}
 
 // Setup event listeners
 function setupEventListeners() {
