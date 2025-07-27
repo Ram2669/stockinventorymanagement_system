@@ -1,0 +1,82 @@
+{
+  "coverage_report": {
+    "total_tests": 12,
+    "passed_tests": 12,
+    "failed_tests": 0,
+    "coverage_percentage": 100.0
+  },
+  "test_results": [
+    {
+      "test_name": "API_CONNECTIVITY",
+      "status": "PASS",
+      "message": "Backend server is running",
+      "timestamp": "2025-07-27T17:09:50.785882"
+    },
+    {
+      "test_name": "STOCK_GET_ALL",
+      "status": "PASS",
+      "message": "Retrieved 9 stock items",
+      "timestamp": "2025-07-27T17:09:50.789064"
+    },
+    {
+      "test_name": "STOCK_DATA_STRUCTURE",
+      "status": "PASS",
+      "message": "All required fields present",
+      "timestamp": "2025-07-27T17:09:50.789088"
+    },
+    {
+      "test_name": "SALES_DAILY_GET",
+      "status": "PASS",
+      "message": "Daily sales: 18 sales, Total revenue: Rs.12300.0",
+      "timestamp": "2025-07-27T17:09:50.792888"
+    },
+    {
+      "test_name": "SALES_WORKFLOW_PREP",
+      "status": "PASS",
+      "message": "Found 9 products with stock",
+      "timestamp": "2025-07-27T17:09:50.796155"
+    },
+    {
+      "test_name": "SALE_WITH_UNIT_PRICE",
+      "status": "PASS",
+      "message": "Sale recorded - ID: 26, Amount: Rs.600.0",
+      "timestamp": "2025-07-27T17:09:50.802370"
+    },
+    {
+      "test_name": "SALE_WITH_UNIT_PRICE_STOCK_UPDATE",
+      "status": "PASS",
+      "message": "Stock updated: 95 \u2192 94",
+      "timestamp": "2025-07-27T17:09:50.805964"
+    },
+    {
+      "test_name": "SALE_WITHOUT_UNIT_PRICE",
+      "status": "PASS",
+      "message": "Sale recorded - ID: 27, Amount: Rs.0.0",
+      "timestamp": "2025-07-27T17:09:50.814319"
+    },
+    {
+      "test_name": "SALE_WITHOUT_UNIT_PRICE_STOCK_UPDATE",
+      "status": "PASS",
+      "message": "Stock updated: 250 \u2192 249",
+      "timestamp": "2025-07-27T17:09:50.821712"
+    },
+    {
+      "test_name": "DAILY_SALES_INITIAL",
+      "status": "PASS",
+      "message": "Initial daily sales count: 20",
+      "timestamp": "2025-07-27T17:09:50.825327"
+    },
+    {
+      "test_name": "DAILY_SALES_TEST_SALE",
+      "status": "PASS",
+      "message": "Test sale recorded for daily sales verification",
+      "timestamp": "2025-07-27T17:09:50.838204"
+    },
+    {
+      "test_name": "DAILY_SALES_UPDATE",
+      "status": "PASS",
+      "message": "Daily sales updated: 20 \u2192 21",
+      "timestamp": "2025-07-27T17:09:51.845298"
+    }
+  ]
+}
