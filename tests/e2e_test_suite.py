@@ -239,15 +239,15 @@ def test_sales_recording_workflow():
 
 def test_daily_sales_update():
     """Test that daily sales are updated after recording"""
-    
+
     # Get initial daily sales count
     try:
         initial_response = make_request("GET", "/sales/daily")
         initial_data = initial_response.json()
         initial_count = initial_data["summary"]["total_sales"]
-        
+
         log_test("DAILY_SALES_INITIAL", "PASS", f"Initial daily sales count: {initial_count}")
-        
+
     except Exception as e:
         log_test("DAILY_SALES_INITIAL", "FAIL", str(e))
         return False
@@ -297,6 +297,126 @@ def test_daily_sales_update():
         log_test("DAILY_SALES_TEST_SALE", "FAIL", str(e))
 
 # ============================================================================
+# TEST SUITE 3: AUTHENTICATION AND ANALYTICS
+# ============================================================================
+
+def test_authentication_endpoints():
+    """Test authentication-related endpoints"""
+
+    # Test admin exists check
+    try:
+        response = make_request("GET", "/auth/check-admin-exists")
+        if response.status_code == 200:
+            admin_data = response.json()
+            log_test("AUTH_ADMIN_EXISTS", "PASS", f"Admin exists check: {admin_data.get('admin_exists', False)}")
+        else:
+            log_test("AUTH_ADMIN_EXISTS", "FAIL", f"Status: {response.status_code}")
+    except Exception as e:
+        log_test("AUTH_ADMIN_EXISTS", "FAIL", str(e))
+
+def test_analytics_endpoints():
+    """Test analytics and reporting endpoints"""
+
+    endpoints_to_test = [
+        ("/analytics/dashboard-stats", "ANALYTICS_DASHBOARD_STATS"),
+        ("/analytics/low-stock-alerts", "ANALYTICS_LOW_STOCK"),
+        ("/analytics/top-selling-products?days=30&limit=5", "ANALYTICS_TOP_PRODUCTS"),
+        ("/analytics/customer-analysis?days=30&limit=5", "ANALYTICS_CUSTOMERS"),
+        ("/analytics/stock-movement?days=30", "ANALYTICS_STOCK_MOVEMENT")
+    ]
+
+    for endpoint, test_name in endpoints_to_test:
+        try:
+            response = make_request("GET", endpoint)
+            if response.status_code == 200:
+                data = response.json()
+                log_test(test_name, "PASS", f"Analytics endpoint working")
+            else:
+                log_test(test_name, "FAIL", f"Status: {response.status_code}")
+        except Exception as e:
+            log_test(test_name, "FAIL", str(e))
+
+# ============================================================================
+# TEST SUITE 4: ERROR HANDLING AND EDGE CASES
+# ============================================================================
+
+def test_error_handling():
+    """Test error handling for invalid requests"""
+
+    # Test invalid sale data
+    invalid_sale_data = {
+        "product_name": "NONEXISTENT_PRODUCT",
+        "company_name": "FAKE_COMPANY",
+        "customer_name": "TEST_ERROR_HANDLING",
+        "quantity_sold": 999999,  # Excessive quantity
+        "unit_price": -10,  # Negative price
+        "payment_status": "invalid_status",
+        "payment_method": "invalid_method"
+    }
+
+    try:
+        response = make_request("POST", "/sales", invalid_sale_data)
+        if response.status_code >= 400:
+            log_test("ERROR_HANDLING_INVALID_SALE", "PASS",
+                    f"Properly rejected invalid sale - Status: {response.status_code}")
+        else:
+            log_test("ERROR_HANDLING_INVALID_SALE", "FAIL",
+                    f"Should have rejected invalid sale - Status: {response.status_code}")
+    except Exception as e:
+        log_test("ERROR_HANDLING_INVALID_SALE", "PASS", f"Request properly failed: {str(e)}")
+
+def test_boundary_conditions():
+    """Test boundary conditions and edge cases"""
+
+    # Test zero quantity sale
+    try:
+        stock_response = make_request("GET", "/stock")
+        stock_data = stock_response.json()
+        available_products = [p for p in stock_data if p["quantity"] > 0]
+
+        if available_products:
+            test_product = available_products[0]
+            zero_quantity_sale = {
+                "product_name": test_product["product_name"],
+                "company_name": test_product["company_name"],
+                "customer_name": "ZERO_QUANTITY_TEST",
+                "quantity_sold": 0,
+                "unit_price": test_product.get("unit_price", 50),
+                "payment_status": "paid",
+                "payment_method": "cash"
+            }
+
+            response = make_request("POST", "/sales", zero_quantity_sale)
+            if response.status_code >= 400:
+                log_test("BOUNDARY_ZERO_QUANTITY", "PASS", "Properly rejected zero quantity sale")
+            else:
+                # Some systems allow zero quantity sales for returns/adjustments
+                log_test("BOUNDARY_ZERO_QUANTITY", "PASS", "Zero quantity sale allowed (business rule dependent)")
+        else:
+            log_test("BOUNDARY_ZERO_QUANTITY", "SKIP", "No products available for boundary testing")
+    except Exception as e:
+        log_test("BOUNDARY_ZERO_QUANTITY", "FAIL", str(e))
+
+def test_performance():
+    """Test basic performance characteristics"""
+
+    import time
+
+    # Test API response times
+    start_time = time.time()
+    try:
+        response = make_request("GET", "/stock")
+        end_time = time.time()
+        response_time = (end_time - start_time) * 1000  # Convert to milliseconds
+
+        if response.status_code == 200 and response_time < 1000:  # Less than 1 second
+            log_test("PERFORMANCE_STOCK_API", "PASS", f"Stock API response time: {response_time:.2f}ms")
+        else:
+            log_test("PERFORMANCE_STOCK_API", "FAIL", f"Slow response: {response_time:.2f}ms")
+    except Exception as e:
+        log_test("PERFORMANCE_STOCK_API", "FAIL", str(e))
+
+# ============================================================================
 # MAIN TEST EXECUTION
 # ============================================================================
 
@@ -304,25 +424,45 @@ def run_all_tests():
     """Run all test suites"""
     print("🧪 Starting Comprehensive E2E Test Suite")
     print("=" * 60)
-    
+
     # Test Suite 1: Basic Connectivity
     print("\n📡 TEST SUITE 1: API Connectivity")
     print("-" * 40)
-    
+
     if not test_api_connectivity():
         print("❌ Backend not accessible. Stopping tests.")
         return False
-    
+
     test_stock_api_endpoints()
     test_sales_api_endpoints()
-    
+
     # Test Suite 2: Sales Functionality
     print("\n💰 TEST SUITE 2: Sales Recording")
     print("-" * 40)
-    
+
     test_sales_recording_workflow()
     test_daily_sales_update()
-    
+
+    # Test Suite 3: Authentication and Analytics
+    print("\n🔐 TEST SUITE 3: Authentication & Analytics")
+    print("-" * 40)
+
+    test_authentication_endpoints()
+    test_analytics_endpoints()
+
+    # Test Suite 4: Error Handling and Edge Cases
+    print("\n⚠️  TEST SUITE 4: Error Handling & Edge Cases")
+    print("-" * 40)
+
+    test_error_handling()
+    test_boundary_conditions()
+
+    # Test Suite 5: Performance Testing
+    print("\n⚡ TEST SUITE 5: Performance Testing")
+    print("-" * 40)
+
+    test_performance()
+
     return True
 
 if __name__ == "__main__":

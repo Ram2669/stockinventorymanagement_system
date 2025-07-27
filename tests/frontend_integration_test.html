@@ -487,34 +487,119 @@
         async function runAllTests() {
             clearResults();
             logTest('TEST_SUITE_START', 'INFO', 'Starting comprehensive frontend integration tests...');
-            
+
             // Test Suite 1: API Connectivity
             const apiConnected = await testAPIConnectivity();
             if (!apiConnected) {
                 logTest('TEST_SUITE_ABORT', 'FAIL', 'API not accessible - aborting remaining tests');
                 return;
             }
-            
+
             await testStockDataStructure();
-            
+
             // Test Suite 2: Sales Recording
             await testSalesRecording();
-            
+
             // Test Suite 3: UI Updates
             await testUIUpdates();
-            
+
+            // Test Suite 4: Additional Coverage Tests
+            await testAdditionalEndpoints();
+            await testErrorScenarios();
+            await testPerformanceMetrics();
+
             // Final report
             const coverage = totalTests > 0 ? (passedTests / totalTests) * 100 : 0;
-            
+
             if (coverage >= 95) {
-                logTest('TEST_SUITE_COMPLETE', 'PASS', 
+                logTest('TEST_SUITE_COMPLETE', 'PASS',
                        `🎉 All tests completed! Coverage: ${coverage.toFixed(1)}% - EXCELLENT!`);
             } else if (coverage >= 80) {
-                logTest('TEST_SUITE_COMPLETE', 'PASS', 
+                logTest('TEST_SUITE_COMPLETE', 'PASS',
                        `✅ Tests completed! Coverage: ${coverage.toFixed(1)}% - GOOD!`);
             } else {
-                logTest('TEST_SUITE_COMPLETE', 'FAIL', 
+                logTest('TEST_SUITE_COMPLETE', 'FAIL',
                        `⚠️ Tests completed! Coverage: ${coverage.toFixed(1)}% - NEEDS IMPROVEMENT`);
+            }
+        }
+
+        async function testAdditionalEndpoints() {
+            // Test authentication endpoints
+            try {
+                const response = await axios.get(`${API_BASE}/auth/check-admin-exists`);
+                if (response.status === 200) {
+                    logTest('AUTH_ENDPOINT_TEST', 'PASS', 'Authentication endpoint accessible');
+                } else {
+                    logTest('AUTH_ENDPOINT_TEST', 'FAIL', `Unexpected status: ${response.status}`);
+                }
+            } catch (error) {
+                logTest('AUTH_ENDPOINT_TEST', 'FAIL', error.message);
+            }
+
+            // Test analytics endpoints
+            const analyticsEndpoints = [
+                '/analytics/dashboard-stats',
+                '/analytics/low-stock-alerts',
+                '/analytics/top-selling-products?days=30&limit=5'
+            ];
+
+            for (const endpoint of analyticsEndpoints) {
+                try {
+                    const response = await axios.get(`${API_BASE}${endpoint}`);
+                    if (response.status === 200) {
+                        logTest(`ANALYTICS_${endpoint.split('/')[2].toUpperCase()}`, 'PASS', 'Analytics endpoint working');
+                    } else {
+                        logTest(`ANALYTICS_${endpoint.split('/')[2].toUpperCase()}`, 'FAIL', `Status: ${response.status}`);
+                    }
+                } catch (error) {
+                    logTest(`ANALYTICS_${endpoint.split('/')[2].toUpperCase()}`, 'FAIL', error.message);
+                }
+            }
+        }
+
+        async function testErrorScenarios() {
+            // Test invalid sale data
+            const invalidSale = {
+                product_name: 'NONEXISTENT_PRODUCT',
+                company_name: 'FAKE_COMPANY',
+                customer_name: 'ERROR_TEST',
+                quantity_sold: -1,
+                unit_price: -100,
+                payment_status: 'invalid',
+                payment_method: 'invalid'
+            };
+
+            try {
+                const response = await axios.post(`${API_BASE}/sales`, invalidSale);
+                if (response.status >= 400) {
+                    logTest('ERROR_HANDLING_INVALID_DATA', 'PASS', 'Invalid data properly rejected');
+                } else {
+                    logTest('ERROR_HANDLING_INVALID_DATA', 'FAIL', 'Should reject invalid data');
+                }
+            } catch (error) {
+                if (error.response && error.response.status >= 400) {
+                    logTest('ERROR_HANDLING_INVALID_DATA', 'PASS', 'Invalid data properly rejected');
+                } else {
+                    logTest('ERROR_HANDLING_INVALID_DATA', 'FAIL', error.message);
+                }
+            }
+        }
+
+        async function testPerformanceMetrics() {
+            // Test API response times
+            const startTime = performance.now();
+            try {
+                await axios.get(`${API_BASE}/stock`);
+                const endTime = performance.now();
+                const responseTime = endTime - startTime;
+
+                if (responseTime < 1000) {
+                    logTest('PERFORMANCE_RESPONSE_TIME', 'PASS', `API response time: ${responseTime.toFixed(2)}ms`);
+                } else {
+                    logTest('PERFORMANCE_RESPONSE_TIME', 'FAIL', `Slow response: ${responseTime.toFixed(2)}ms`);
+                }
+            } catch (error) {
+                logTest('PERFORMANCE_RESPONSE_TIME', 'FAIL', error.message);
             }
         }
 

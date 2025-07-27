@@ -1,7 +1,7 @@
 {
   "coverage_report": {
-    "total_tests": 12,
-    "passed_tests": 12,
+    "total_tests": 21,
+    "passed_tests": 21,
     "failed_tests": 0,
     "coverage_percentage": 100.0
   },
@@ -10,73 +10,127 @@
       "test_name": "API_CONNECTIVITY",
       "status": "PASS",
       "message": "Backend server is running",
-      "timestamp": "2025-07-27T17:09:50.785882"
+      "timestamp": "2025-07-27T17:15:00.722831"
     },
     {
       "test_name": "STOCK_GET_ALL",
       "status": "PASS",
       "message": "Retrieved 9 stock items",
-      "timestamp": "2025-07-27T17:09:50.789064"
+      "timestamp": "2025-07-27T17:15:00.726351"
     },
     {
       "test_name": "STOCK_DATA_STRUCTURE",
       "status": "PASS",
       "message": "All required fields present",
-      "timestamp": "2025-07-27T17:09:50.789088"
+      "timestamp": "2025-07-27T17:15:00.726377"
     },
     {
       "test_name": "SALES_DAILY_GET",
       "status": "PASS",
-      "message": "Daily sales: 18 sales, Total revenue: Rs.12300.0",
-      "timestamp": "2025-07-27T17:09:50.792888"
+      "message": "Daily sales: 85 sales, Total revenue: Rs.26825.0",
+      "timestamp": "2025-07-27T17:15:00.730706"
     },
     {
       "test_name": "SALES_WORKFLOW_PREP",
       "status": "PASS",
-      "message": "Found 9 products with stock",
-      "timestamp": "2025-07-27T17:09:50.796155"
+      "message": "Found 8 products with stock",
+      "timestamp": "2025-07-27T17:15:00.733105"
     },
     {
       "test_name": "SALE_WITH_UNIT_PRICE",
       "status": "PASS",
-      "message": "Sale recorded - ID: 26, Amount: Rs.600.0",
-      "timestamp": "2025-07-27T17:09:50.802370"
+      "message": "Sale recorded - ID: 93, Amount: Rs.600.0",
+      "timestamp": "2025-07-27T17:15:00.740261"
     },
     {
       "test_name": "SALE_WITH_UNIT_PRICE_STOCK_UPDATE",
       "status": "PASS",
-      "message": "Stock updated: 95 \u2192 94",
-      "timestamp": "2025-07-27T17:09:50.805964"
+      "message": "Stock updated: 78 \u2192 77",
+      "timestamp": "2025-07-27T17:15:00.743069"
     },
     {
       "test_name": "SALE_WITHOUT_UNIT_PRICE",
       "status": "PASS",
-      "message": "Sale recorded - ID: 27, Amount: Rs.0.0",
-      "timestamp": "2025-07-27T17:09:50.814319"
+      "message": "Sale recorded - ID: 94, Amount: Rs.0.0",
+      "timestamp": "2025-07-27T17:15:00.749441"
     },
     {
       "test_name": "SALE_WITHOUT_UNIT_PRICE_STOCK_UPDATE",
       "status": "PASS",
-      "message": "Stock updated: 250 \u2192 249",
-      "timestamp": "2025-07-27T17:09:50.821712"
+      "message": "Stock updated: 137 \u2192 136",
+      "timestamp": "2025-07-27T17:15:00.752529"
     },
     {
       "test_name": "DAILY_SALES_INITIAL",
       "status": "PASS",
-      "message": "Initial daily sales count: 20",
-      "timestamp": "2025-07-27T17:09:50.825327"
+      "message": "Initial daily sales count: 87",
+      "timestamp": "2025-07-27T17:15:00.757128"
     },
     {
       "test_name": "DAILY_SALES_TEST_SALE",
       "status": "PASS",
       "message": "Test sale recorded for daily sales verification",
-      "timestamp": "2025-07-27T17:09:50.838204"
+      "timestamp": "2025-07-27T17:15:00.765993"
     },
     {
       "test_name": "DAILY_SALES_UPDATE",
       "status": "PASS",
-      "message": "Daily sales updated: 20 \u2192 21",
-      "timestamp": "2025-07-27T17:09:51.845298"
+      "message": "Daily sales updated: 87 \u2192 88",
+      "timestamp": "2025-07-27T17:15:01.776926"
+    },
+    {
+      "test_name": "AUTH_ADMIN_EXISTS",
+      "status": "PASS",
+      "message": "Admin exists check: True",
+      "timestamp": "2025-07-27T17:15:01.780531"
+    },
+    {
+      "test_name": "ANALYTICS_DASHBOARD_STATS",
+      "status": "PASS",
+      "message": "Analytics endpoint working",
+      "timestamp": "2025-07-27T17:15:01.793399"
+    },
+    {
+      "test_name": "ANALYTICS_LOW_STOCK",
+      "status": "PASS",
+      "message": "Analytics endpoint working",
+      "timestamp": "2025-07-27T17:15:01.796531"
+    },
+    {
+      "test_name": "ANALYTICS_TOP_PRODUCTS",
+      "status": "PASS",
+      "message": "Analytics endpoint working",
+      "timestamp": "2025-07-27T17:15:01.802264"
+    },
+    {
+      "test_name": "ANALYTICS_CUSTOMERS",
+      "status": "PASS",
+      "message": "Analytics endpoint working",
+      "timestamp": "2025-07-27T17:15:01.809361"
+    },
+    {
+      "test_name": "ANALYTICS_STOCK_MOVEMENT",
+      "status": "PASS",
+      "message": "Analytics endpoint working",
+      "timestamp": "2025-07-27T17:15:01.813933"
+    },
+    {
+      "test_name": "ERROR_HANDLING_INVALID_SALE",
+      "status": "PASS",
+      "message": "Properly rejected invalid sale - Status: 400",
+      "timestamp": "2025-07-27T17:15:01.817294"
+    },
+    {
+      "test_name": "BOUNDARY_ZERO_QUANTITY",
+      "status": "PASS",
+      "message": "Zero quantity sale allowed (business rule dependent)",
+      "timestamp": "2025-07-27T17:15:01.826962"
+    },
+    {
+      "test_name": "PERFORMANCE_STOCK_API",
+      "status": "PASS",
+      "message": "Stock API response time: 3.00ms",
+      "timestamp": "2025-07-27T17:15:01.830046"
     }
   ]
 }
