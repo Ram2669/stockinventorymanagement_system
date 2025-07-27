@@ -444,21 +444,23 @@ function closeSaleModal() {
 }
 
 // Download receipt
-async function downloadReceipt() {
-    if (!lastSaleId) {
+async function downloadReceipt(saleId = null) {
+    const receiptSaleId = saleId || lastSaleId;
+
+    if (!receiptSaleId) {
         showToast('No sale ID available for receipt', 'error');
         return;
     }
 
     try {
-        const response = await axios.get(`${API_BASE}/receipt/${lastSaleId}`, {
+        const response = await axios.get(`${API_BASE}/sales/${receiptSaleId}/receipt`, {
             responseType: 'blob'
         });
 
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', `receipt_${lastSaleId}_${new Date().toISOString().split('T')[0]}.pdf`);
+        link.setAttribute('download', `receipt_${receiptSaleId}_${new Date().toISOString().split('T')[0]}.pdf`);
         document.body.appendChild(link);
         link.click();
         link.remove();
