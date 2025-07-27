@@ -368,17 +368,19 @@ document.getElementById('recordSaleForm').addEventListener('submit', async (e) =
         // Close record sale modal FIRST
         closeRecordSaleModal();
 
-        // Show success modal with sale details AFTER closing the record modal
+        // Show success message immediately
+        showMessage(`Sale recorded successfully! Sale ID: ${response.data.sale_id}`, 'success');
+
+        // Show success modal with sale details AFTER a short delay
         setTimeout(() => {
             console.log('About to show success modal...');
             showSaleSuccessModal(response.data);
-        }, 100);
+        }, 500);
 
-        // Reload data
-        loadDashboardData(); // Reload to update stock alerts
-
-        // Show success message
-        showMessage(`Sale recorded successfully! Sale ID: ${response.data.sale_id}`, 'success');
+        // Reload data after modal is shown
+        setTimeout(() => {
+            loadDashboardData(); // Reload to update stock alerts
+        }, 1000);
 
     } catch (error) {
         console.error('Sale submission error:', error);
@@ -476,19 +478,31 @@ function showSaleSuccessModal(saleData) {
     }
 
     saleDetails.innerHTML = `
-        <div style="background: #e8f5e8; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
-            <h4 style="color: #2e7d32; margin: 0 0 15px 0; font-size: 1.3em;">✅ Sale Recorded Successfully!</h4>
-            <div style="background: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
-                <p><strong>Sale ID:</strong> ${saleData.sale_id}</p>
-                <p><strong>Customer:</strong> ${saleData.customer_name}</p>
-                <p><strong>Product:</strong> ${saleData.product_name} (${saleData.company_name})</p>
-                <p><strong>Quantity:</strong> ${saleData.quantity_sold}</p>
-                <p><strong>Unit Price:</strong> Rs.${saleData.unit_price}</p>
-                <p style="font-size: 1.2em; color: #2e7d32;"><strong>Total Amount: Rs.${saleData.sale_amount}</strong></p>
-                <p><strong>Payment Status:</strong> ${saleData.payment_status === 'paid' ? '✅ Paid' : '💰 Unpaid'}</p>
-                ${saleData.payment_method ? `<p><strong>Payment Method:</strong> ${saleData.payment_method.toUpperCase()}</p>` : ''}
+        <div style="background: #e8f5e8; padding: 25px; border-radius: 12px; margin-bottom: 25px; text-align: center; border: 3px solid #32CD32;">
+            <h4 style="color: #2e7d32; margin: 0 0 20px 0; font-size: 1.5em;">🎉 Sale Recorded Successfully!</h4>
+
+            <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <div style="background: #32CD32; color: white; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                    <h3 style="margin: 0; font-size: 1.3em;">📄 SALE ID: ${saleData.sale_id}</h3>
+                </div>
+
+                <div style="text-align: left; font-size: 1.1em; line-height: 1.6;">
+                    <p><strong>👤 Customer:</strong> ${saleData.customer_name}</p>
+                    <p><strong>📦 Product:</strong> ${saleData.product_name} (${saleData.company_name})</p>
+                    <p><strong>🔢 Quantity:</strong> ${saleData.quantity_sold}</p>
+                    <p><strong>💰 Unit Price:</strong> Rs.${saleData.unit_price}</p>
+                    <p style="font-size: 1.3em; color: #2e7d32; background: #e8f5e8; padding: 10px; border-radius: 5px; text-align: center;">
+                        <strong>💵 Total Amount: Rs.${saleData.sale_amount}</strong>
+                    </p>
+                    <p><strong>💳 Payment Status:</strong> ${saleData.payment_status === 'paid' ? '✅ Paid' : '💰 Unpaid'}</p>
+                    ${saleData.payment_method ? `<p><strong>🏦 Payment Method:</strong> ${saleData.payment_method.toUpperCase()}</p>` : ''}
+                </div>
             </div>
-            <p style="color: #2e7d32; font-weight: bold; margin: 0;">📄 Download or Print Receipt Below</p>
+
+            <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <h4 style="color: #856404; margin: 0 0 10px 0;">📄 Receipt Options Available</h4>
+                <p style="color: #856404; margin: 0; font-weight: bold;">Click Download or Print below to get your receipt!</p>
+            </div>
         </div>
     `;
 
@@ -565,30 +579,55 @@ async function downloadReceipt() {
     console.log('Using sale ID:', saleId);
 
     if (!saleId) {
-        alert('Please enter a sale ID or record a sale first');
+        showMessage('Please enter a sale ID or record a sale first', 'error');
         return;
     }
 
     try {
         console.log('Requesting receipt for sale ID:', saleId);
+
+        // Show loading message
+        showMessage('Generating receipt PDF...', 'success');
+
         const response = await axios.get(`${API_BASE}/sales/${saleId}/receipt`, {
-            responseType: 'blob'
+            responseType: 'blob',
+            timeout: 30000 // 30 second timeout
         });
 
-        console.log('Receipt response received');
-        const url = window.URL.createObjectURL(new Blob([response.data]));
+        console.log('Receipt response received, size:', response.data.size);
+
+        // Create blob and download
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', `receipt_${saleId}_${new Date().toISOString().split('T')[0]}.pdf`);
+        link.setAttribute('download', `SRI_LAKSHMI_RECEIPT_${saleId}_${new Date().toISOString().split('T')[0]}.pdf`);
+        link.style.display = 'none';
         document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
 
-        showMessage('Receipt downloaded successfully!', 'success');
+        // Trigger download
+        link.click();
+
+        // Cleanup
+        setTimeout(() => {
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        }, 100);
+
+        showMessage(`Receipt downloaded successfully! Sale ID: ${saleId}`, 'success');
+
     } catch (error) {
         console.error('Error downloading receipt:', error);
-        const errorMsg = error.response?.data?.error || 'Error downloading receipt. Please check if the sale ID exists.';
+        let errorMsg = 'Error downloading receipt.';
+
+        if (error.code === 'ECONNABORTED') {
+            errorMsg = 'Request timeout. Please try again.';
+        } else if (error.response?.status === 404) {
+            errorMsg = `Sale ID ${saleId} not found.`;
+        } else if (error.response?.data?.error) {
+            errorMsg = error.response.data.error;
+        }
+
         showMessage(errorMsg, 'error');
     }
 }
@@ -604,26 +643,55 @@ async function printReceipt() {
     console.log('Using sale ID for print:', saleId);
 
     if (!saleId) {
-        alert('Please enter a sale ID or record a sale first');
+        showMessage('Please enter a sale ID or record a sale first', 'error');
         return;
     }
 
     try {
         console.log('Requesting receipt for printing, sale ID:', saleId);
+
+        // Show loading message
+        showMessage('Preparing receipt for printing...', 'success');
+
         const response = await axios.get(`${API_BASE}/sales/${saleId}/receipt`, {
-            responseType: 'blob'
+            responseType: 'blob',
+            timeout: 30000
         });
 
-        console.log('Receipt response received for printing');
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const printWindow = window.open(url);
-        printWindow.onload = function() {
-            printWindow.print();
-        };
-        showMessage('Receipt opened for printing!', 'success');
+        console.log('Receipt response received for printing, size:', response.data.size);
+
+        // Create blob URL
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+
+        // Open in new window for printing
+        const printWindow = window.open(url, '_blank');
+
+        if (printWindow) {
+            printWindow.onload = function() {
+                // Small delay to ensure PDF loads
+                setTimeout(() => {
+                    printWindow.print();
+                }, 500);
+            };
+            showMessage(`Receipt opened for printing! Sale ID: ${saleId}`, 'success');
+        } else {
+            // Fallback if popup blocked
+            showMessage('Popup blocked. Please allow popups and try again.', 'error');
+        }
+
     } catch (error) {
         console.error('Error printing receipt:', error);
-        const errorMsg = error.response?.data?.error || 'Error printing receipt. Please check if the sale ID exists.';
+        let errorMsg = 'Error printing receipt.';
+
+        if (error.code === 'ECONNABORTED') {
+            errorMsg = 'Request timeout. Please try again.';
+        } else if (error.response?.status === 404) {
+            errorMsg = `Sale ID ${saleId} not found.`;
+        } else if (error.response?.data?.error) {
+            errorMsg = error.response.data.error;
+        }
+
         showMessage(errorMsg, 'error');
     }
 }
