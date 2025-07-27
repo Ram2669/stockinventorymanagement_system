@@ -55,7 +55,8 @@ async function loadDashboardData() {
     await Promise.all([
         loadStockAlerts(),
         loadStockData(),
-        loadProducts()
+        loadProducts(),
+        loadDailySales()
     ]);
 }
 
@@ -92,8 +93,80 @@ async function loadStockAlerts() {
         
     } catch (error) {
         console.error('Error loading stock alerts:', error);
-        document.getElementById('stockAlerts').innerHTML = 
+        document.getElementById('stockAlerts').innerHTML =
             '<div class="error">Failed to load stock alerts</div>';
+    }
+}
+
+// Load daily sales for salesperson
+async function loadDailySales() {
+    try {
+        const response = await axios.get(`${API_BASE}/sales/daily`);
+        const data = response.data;
+
+        // Update daily sales summary with action cards
+        const summaryElement = document.getElementById('dailySalesSummary');
+        summaryElement.innerHTML = `
+            <div class="action-card" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                <div class="icon"><i class="fas fa-shopping-cart"></i></div>
+                <h3>${data.summary.total_sales}</h3>
+                <p>Sales Today</p>
+            </div>
+            <div class="action-card" style="background: linear-gradient(135deg, #ffc107, #fd7e14);">
+                <div class="icon"><i class="fas fa-rupee-sign"></i></div>
+                <h3>Rs.${data.summary.total_revenue.toFixed(0)}</h3>
+                <p>Revenue Today</p>
+            </div>
+            <div class="action-card" style="background: linear-gradient(135deg, #17a2b8, #6f42c1);">
+                <div class="icon"><i class="fas fa-check-circle"></i></div>
+                <h3>${data.summary.paid_sales}</h3>
+                <p>Paid Sales</p>
+            </div>
+            <div class="action-card" style="background: linear-gradient(135deg, #dc3545, #e83e8c);">
+                <div class="icon"><i class="fas fa-clock"></i></div>
+                <h3>${data.summary.unpaid_sales}</h3>
+                <p>Unpaid Sales</p>
+            </div>
+        `;
+
+        // Update daily sales list
+        const salesList = document.getElementById('dailySalesList');
+
+        if (data.sales.length === 0) {
+            salesList.innerHTML = `
+                <div class="no-alerts">
+                    <i class="fas fa-calendar-day" style="font-size: 2em; margin-bottom: 10px;"></i>
+                    <div>📅 No sales recorded today</div>
+                    <div style="font-size: 0.9em; margin-top: 5px;">Start recording sales to see them here!</div>
+                </div>
+            `;
+            return;
+        }
+
+        salesList.innerHTML = `
+            <div class="sales-list">
+                ${data.sales.map(sale => `
+                    <div class="alert-item">
+                        <div class="alert-info">
+                            <h4>#${sale.id} - ${sale.customer_name}</h4>
+                            <p>${sale.product_name} (${sale.company_name}) • Qty: ${sale.quantity_sold}</p>
+                            <small>${new Date(sale.sale_date).toLocaleTimeString()}</small>
+                        </div>
+                        <div class="alert-status">
+                            <div class="status ${sale.payment_status === 'paid' ? 'paid' : 'unpaid'}">
+                                ${sale.payment_status === 'paid' ? '✅ Paid' : '💰 Unpaid'}
+                            </div>
+                            <div class="quantity">Rs.${sale.sale_amount.toFixed(2)}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+    } catch (error) {
+        console.error('Error loading daily sales:', error);
+        document.getElementById('dailySalesSummary').innerHTML = '<div class="error">Error loading daily sales summary</div>';
+        document.getElementById('dailySalesList').innerHTML = '<div class="error">Error loading daily sales</div>';
     }
 }
 

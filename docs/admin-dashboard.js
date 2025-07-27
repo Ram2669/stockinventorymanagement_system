@@ -50,6 +50,7 @@ async function loadDashboardData() {
         loadDashboardStats(),
         loadStockInventory(),
         loadUsers(),
+        loadDailySales(),
         loadAnalytics()
     ]);
 }
@@ -145,8 +146,97 @@ async function loadUsers() {
         
     } catch (error) {
         console.error('Error loading users:', error);
-        document.getElementById('usersList').innerHTML = 
+        document.getElementById('usersList').innerHTML =
             '<div class="error">Failed to load users</div>';
+    }
+}
+
+// Load daily sales
+async function loadDailySales() {
+    try {
+        const response = await axios.get(`${API_BASE}/sales/daily`);
+        const data = response.data;
+
+        // Update daily sales summary
+        const summaryElement = document.getElementById('dailySalesSummary');
+        summaryElement.innerHTML = `
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+                <div class="stat-info">
+                    <h3>${data.summary.total_sales}</h3>
+                    <p>Total Sales Today</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-rupee-sign"></i></div>
+                <div class="stat-info">
+                    <h3>Rs.${data.summary.total_revenue.toFixed(2)}</h3>
+                    <p>Today's Revenue</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-info">
+                    <h3>${data.summary.paid_sales}</h3>
+                    <p>Paid Sales</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                <div class="stat-info">
+                    <h3>${data.summary.unpaid_sales}</h3>
+                    <p>Unpaid Sales</p>
+                </div>
+            </div>
+        `;
+
+        // Update daily sales list
+        const salesList = document.getElementById('dailySalesList');
+
+        if (data.sales.length === 0) {
+            salesList.innerHTML = '<div class="no-data">No sales recorded today</div>';
+            return;
+        }
+
+        salesList.innerHTML = `
+            <div class="sales-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sale ID</th>
+                            <th>Time</th>
+                            <th>Customer</th>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Amount</th>
+                            <th>Payment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.sales.map(sale => `
+                            <tr>
+                                <td>#${sale.id}</td>
+                                <td>${new Date(sale.sale_date).toLocaleTimeString()}</td>
+                                <td>${sale.customer_name}</td>
+                                <td>${sale.product_name} (${sale.company_name})</td>
+                                <td>${sale.quantity_sold}</td>
+                                <td>Rs.${sale.sale_amount.toFixed(2)}</td>
+                                <td>
+                                    <span class="payment-status ${sale.payment_status}">
+                                        ${sale.payment_status === 'paid' ? '✅ Paid' : '💰 Unpaid'}
+                                    </span>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+    } catch (error) {
+        console.error('Error loading daily sales:', error);
+        document.getElementById('dailySalesSummary').innerHTML = '<div class="error">Error loading daily sales summary</div>';
+        document.getElementById('dailySalesList').innerHTML = '<div class="error">Error loading daily sales</div>';
     }
 }
 

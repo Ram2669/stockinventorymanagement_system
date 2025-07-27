@@ -206,10 +206,13 @@ def record_sale():
     )
 
     # Update stock quantity
+    old_quantity = stock.quantity
     stock.quantity -= int(data['quantity_sold'])
+    print(f"Stock update: {stock.product_name} - Old quantity: {old_quantity}, New quantity: {stock.quantity}")
 
     db.session.add(new_sale)
     db.session.commit()
+    print(f"Sale recorded and stock updated successfully")
 
     return jsonify({
         "message": "Sale recorded successfully",
@@ -284,6 +287,34 @@ def get_weekly_sales():
     ).all()
 
     return jsonify([sale.to_dict() for sale in sales])
+
+# Get today's sales
+@app.route('/api/sales/daily', methods=['GET'])
+def get_daily_sales():
+    today = datetime.utcnow().date()
+
+    # Get sales for today
+    daily_sales = Sale.query.filter(
+        func.date(Sale.sale_date) == today
+    ).order_by(Sale.sale_date.desc()).all()
+
+    # Calculate daily totals
+    total_sales = len(daily_sales)
+    total_revenue = sum(sale.sale_amount for sale in daily_sales)
+    paid_sales = [sale for sale in daily_sales if sale.payment_status == 'paid']
+    unpaid_sales = [sale for sale in daily_sales if sale.payment_status == 'unpaid']
+
+    return jsonify({
+        'sales': [sale.to_dict() for sale in daily_sales],
+        'summary': {
+            'total_sales': total_sales,
+            'total_revenue': float(total_revenue),
+            'paid_sales': len(paid_sales),
+            'unpaid_sales': len(unpaid_sales),
+            'paid_amount': float(sum(sale.sale_amount for sale in paid_sales)),
+            'unpaid_amount': float(sum(sale.sale_amount for sale in unpaid_sales))
+        }
+    })
 
 # PDF Generation Endpoints
 @app.route('/api/reports/weekly/customer', methods=['GET'])

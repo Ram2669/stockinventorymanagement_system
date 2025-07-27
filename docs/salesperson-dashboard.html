@@ -493,6 +493,31 @@
                 width: 100%;
             }
         }
+
+        /* Daily Sales Styles */
+        .sales-list {
+            margin-top: 10px;
+        }
+
+        .sales-list .alert-item {
+            margin-bottom: 10px;
+        }
+
+        .sales-list .status.paid {
+            background: #d4edda;
+            color: #155724;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .sales-list .status.unpaid {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
@@ -534,6 +559,20 @@
                 </div>
                 <h3 style="margin: 10px 0 5px 0;">📄 Get Receipt</h3>
                 <p style="margin: 0; opacity: 0.9;">Download PDF receipt for any sale</p>
+            </div>
+        </div>
+
+        <!-- Today's Sales Section -->
+        <div class="alerts-section">
+            <div class="alerts-header">
+                <i class="fas fa-calendar-day" style="color: #28a745; font-size: 1.5em;"></i>
+                <h2>Today's Sales</h2>
+            </div>
+            <div id="dailySalesSummary" class="quick-actions" style="margin-bottom: 20px;">
+                <div class="loading">Loading today's sales summary...</div>
+            </div>
+            <div id="dailySalesList">
+                <div class="loading">Loading today's sales...</div>
             </div>
         </div>
 
