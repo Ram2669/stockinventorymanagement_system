@@ -73,16 +73,30 @@ def add_stock():
     if existing_stock:
         existing_stock.quantity += int(data['quantity'])
         existing_stock.date_added = datetime.utcnow()
+        if 'unit_price' in data:
+            existing_stock.unit_price = float(data['unit_price'])
     else:
         new_stock = Stock(
             product_name=data['product_name'],
             company_name=data['company_name'],
-            quantity=int(data['quantity'])
+            quantity=int(data['quantity']),
+            unit_price=float(data.get('unit_price', 0.0))
         )
         db.session.add(new_stock)
 
     db.session.commit()
     return jsonify({"message": "Stock added successfully"}), 201
+
+@app.route('/api/stock/<int:stock_id>', methods=['GET'])
+def get_stock_item(stock_id):
+    stock = Stock.query.get_or_404(stock_id)
+    return jsonify({
+        'id': stock.id,
+        'product_name': stock.product_name,
+        'company_name': stock.company_name,
+        'quantity': stock.quantity,
+        'unit_price': stock.unit_price
+    })
 
 @app.route('/api/stock/<int:stock_id>', methods=['PUT'])
 def update_stock(stock_id):
@@ -92,6 +106,10 @@ def update_stock(stock_id):
     stock.product_name = data.get('product_name', stock.product_name)
     stock.company_name = data.get('company_name', stock.company_name)
     stock.quantity = int(data.get('quantity', stock.quantity))
+
+    # Update unit_price if provided
+    if 'unit_price' in data:
+        stock.unit_price = float(data.get('unit_price'))
 
     db.session.commit()
     return jsonify({"message": "Stock updated successfully"})

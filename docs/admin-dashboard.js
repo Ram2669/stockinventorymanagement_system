@@ -636,8 +636,11 @@ document.getElementById('editStockForm').addEventListener('submit', async functi
 // Edit stock function
 async function editStock(stockId) {
     try {
+        console.log(`Loading stock item ${stockId}...`);
         const response = await axios.get(`${API_BASE}/stock/${stockId}`);
         const stock = response.data;
+
+        console.log('Stock data loaded:', stock);
 
         document.getElementById('editStockId').value = stock.id;
         document.getElementById('editProductName').value = stock.product_name;
@@ -648,7 +651,9 @@ async function editStock(stockId) {
         showEditStockModal();
 
     } catch (error) {
-        alert('Error loading stock item details');
+        console.error('Error loading stock item:', error);
+        const errorMessage = error.response?.data?.error || error.message || 'Failed to load stock item details';
+        alert(`Error loading stock item details: ${errorMessage}`);
     }
 }
 

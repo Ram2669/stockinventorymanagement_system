@@ -9,6 +9,7 @@ class Stock(db.Model):
     product_name = db.Column(db.String(100), nullable=False)
     company_name = db.Column(db.String(100), nullable=False)
     quantity = db.Column(db.Integer, nullable=False, default=0)
+    unit_price = db.Column(db.Float, nullable=True, default=0.0)
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
     
     def to_dict(self):
@@ -17,6 +18,7 @@ class Stock(db.Model):
             'product_name': self.product_name,
             'company_name': self.company_name,
             'quantity': self.quantity,
+            'unit_price': self.unit_price,
             'date_added': self.date_added.strftime('%Y-%m-%d %H:%M:%S')
         }
 
