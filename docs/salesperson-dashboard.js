@@ -157,14 +157,17 @@ function setupProductSearch() {
 
         if (filteredProducts.length > 0) {
             suggestions.innerHTML = filteredProducts.map(product => `
-                <div class="suggestion-item" onclick="selectProduct(${product.id}, '${product.product_name}', '${product.company_name}', ${product.quantity}, ${product.unit_price || 0})">
-                    <strong>${product.product_name}</strong> (${product.company_name})
-                    <div class="product-info">Available: ${product.quantity} | Price: Rs.${product.unit_price || 'Not Set'}</div>
+                <div class="suggestion-item" onclick="selectProduct(${product.id}, '${product.product_name.replace(/'/g, "\\'")}', '${product.company_name.replace(/'/g, "\\'")}', ${product.quantity}, ${product.unit_price || 0})">
+                    <div class="product-name"><strong>${product.product_name}</strong> (${product.company_name})</div>
+                    <div class="product-info">
+                        <span class="stock-info">📦 Available: ${product.quantity}</span> |
+                        <span class="price-info">💰 Price: Rs.${product.unit_price ? product.unit_price.toFixed(2) : 'Not Set by Admin'}</span>
+                    </div>
                 </div>
             `).join('');
             suggestions.style.display = 'block';
         } else {
-            suggestions.innerHTML = '<div class="suggestion-item">No products found</div>';
+            suggestions.innerHTML = '<div class="suggestion-item no-results">No products found</div>';
             suggestions.style.display = 'block';
         }
     });
@@ -182,16 +185,32 @@ function selectProduct(id, productName, companyName, quantity, unitPrice) {
     const productSearch = document.getElementById('productSearch');
     const suggestions = document.getElementById('productSuggestions');
     const selectedProductId = document.getElementById('selectedProductId');
+    const unitPriceField = document.getElementById('unitPrice');
 
+    // Set the search field value
     productSearch.value = `${productName} (${companyName})`;
     selectedProductId.value = id;
     suggestions.style.display = 'none';
 
-    // Auto-fill unit price if available
-    const unitPriceField = document.getElementById('unitPrice');
-    if (unitPriceField && unitPrice > 0) {
-        unitPriceField.value = unitPrice;
+    // Auto-fill unit price and show admin-set price
+    if (unitPriceField) {
+        if (unitPrice > 0) {
+            unitPriceField.value = unitPrice.toFixed(2);
+            unitPriceField.style.color = '#28a745';
+            unitPriceField.style.fontWeight = 'bold';
+        } else {
+            unitPriceField.value = '';
+            unitPriceField.placeholder = 'Price not set by admin';
+            unitPriceField.style.color = '#dc3545';
+        }
         updateTotalAmount(); // Calculate total if quantity is already entered
+    }
+
+    // Show success message for price loading
+    if (unitPrice > 0) {
+        showMessage(`Product selected! Admin price: Rs.${unitPrice.toFixed(2)}`, 'success');
+    } else {
+        showMessage('Warning: Price not set by admin for this product', 'warning');
     }
 }
 
@@ -357,11 +376,64 @@ document.getElementById('recordSaleForm').addEventListener('submit', async (e) =
 });
 
 function showMessage(message, type) {
-    const messageDiv = document.getElementById('saleMessage');
-    messageDiv.innerHTML = `<div class="${type}-message">${message}</div>`;
+    // Create or get message container
+    let messageContainer = document.getElementById('messageContainer');
+    if (!messageContainer) {
+        messageContainer = document.createElement('div');
+        messageContainer.id = 'messageContainer';
+        messageContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            max-width: 400px;
+        `;
+        document.body.appendChild(messageContainer);
+    }
+
+    // Create message element
+    const messageElement = document.createElement('div');
+    const bgColor = type === 'success' ? '#28a745' : type === 'warning' ? '#ffc107' : '#dc3545';
+    const textColor = type === 'warning' ? '#212529' : 'white';
+
+    messageElement.style.cssText = `
+        padding: 12px 20px;
+        margin-bottom: 10px;
+        border-radius: 6px;
+        color: ${textColor};
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        background-color: ${bgColor};
+        border-left: 4px solid ${type === 'success' ? '#155724' : type === 'warning' ? '#856404' : '#721c24'};
+        transform: translateX(100%);
+        transition: transform 0.3s ease-out;
+    `;
+
+    messageElement.innerHTML = `
+        <div style="display: flex; align-items: center;">
+            <span style="margin-right: 8px; font-size: 1.2em;">
+                ${type === 'success' ? '✅' : type === 'warning' ? '⚠️' : '❌'}
+            </span>
+            <span>${message}</span>
+        </div>
+    `;
+
+    messageContainer.appendChild(messageElement);
+
+    // Animate in
     setTimeout(() => {
-        messageDiv.innerHTML = '';
-    }, 5000);
+        messageElement.style.transform = 'translateX(0)';
+    }, 10);
+
+    // Remove message after 4 seconds
+    setTimeout(() => {
+        messageElement.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (messageElement.parentNode) {
+                messageElement.parentNode.removeChild(messageElement);
+            }
+        }, 300);
+    }, 4000);
 }
 
 function logout() {
