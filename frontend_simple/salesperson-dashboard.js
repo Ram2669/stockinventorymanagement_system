@@ -2,6 +2,7 @@
 let currentUser = null;
 let stockData = [];
 let lastSaleId = null;
+let allProducts = [];
 
 // Check authentication on page load
 window.addEventListener('DOMContentLoaded', async () => {
@@ -53,7 +54,8 @@ async function checkAuthentication() {
 async function loadDashboardData() {
     await Promise.all([
         loadStockAlerts(),
-        loadStockData()
+        loadStockData(),
+        loadProducts()
     ]);
 }
 
@@ -119,8 +121,101 @@ async function loadStockData() {
     }
 }
 
+// Load products for search functionality
+async function loadProducts() {
+    try {
+        const response = await axios.get(`${API_BASE}/stock`);
+        allProducts = response.data;
+        setupProductSearch();
+
+    } catch (error) {
+        console.error('Error loading products:', error);
+    }
+}
+
+// Setup product search functionality
+function setupProductSearch() {
+    const productSearch = document.getElementById('productSearch');
+    const suggestions = document.getElementById('productSuggestions');
+    const selectedProductId = document.getElementById('selectedProductId');
+
+    if (!productSearch) return; // Element might not exist yet
+
+    productSearch.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+
+        if (query.length < 1) {
+            suggestions.style.display = 'none';
+            selectedProductId.value = '';
+            return;
+        }
+
+        const filteredProducts = allProducts.filter(product =>
+            product.product_name.toLowerCase().includes(query) ||
+            product.company_name.toLowerCase().includes(query)
+        );
+
+        if (filteredProducts.length > 0) {
+            suggestions.innerHTML = filteredProducts.map(product => `
+                <div class="suggestion-item" onclick="selectProduct(${product.id}, '${product.product_name}', '${product.company_name}', ${product.quantity}, ${product.unit_price || 0})">
+                    <strong>${product.product_name}</strong> (${product.company_name})
+                    <div class="product-info">Available: ${product.quantity} | Price: Rs.${product.unit_price || 'Not Set'}</div>
+                </div>
+            `).join('');
+            suggestions.style.display = 'block';
+        } else {
+            suggestions.innerHTML = '<div class="suggestion-item">No products found</div>';
+            suggestions.style.display = 'block';
+        }
+    });
+
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!productSearch.contains(e.target) && !suggestions.contains(e.target)) {
+            suggestions.style.display = 'none';
+        }
+    });
+}
+
+// Select product from suggestions
+function selectProduct(id, productName, companyName, quantity, unitPrice) {
+    const productSearch = document.getElementById('productSearch');
+    const suggestions = document.getElementById('productSuggestions');
+    const selectedProductId = document.getElementById('selectedProductId');
+
+    productSearch.value = `${productName} (${companyName})`;
+    selectedProductId.value = id;
+    suggestions.style.display = 'none';
+
+    // Auto-fill unit price if available
+    const unitPriceField = document.getElementById('unitPrice');
+    if (unitPriceField && unitPrice > 0) {
+        unitPriceField.value = unitPrice;
+        updateTotalAmount(); // Calculate total if quantity is already entered
+    }
+}
+
+// Update total amount when quantity changes
+function updateTotalAmount() {
+    const quantityField = document.getElementById('quantity');
+    const unitPriceField = document.getElementById('unitPrice');
+    const totalAmountField = document.getElementById('totalAmount');
+
+    if (quantityField && unitPriceField && totalAmountField) {
+        const quantity = parseFloat(quantityField.value) || 0;
+        const unitPrice = parseFloat(unitPriceField.value) || 0;
+        const total = quantity * unitPrice;
+
+        totalAmountField.value = total.toFixed(2);
+    }
+}
+
 function showRecordSale() {
     document.getElementById('recordSaleModal').style.display = 'block';
+    // Setup product search when modal opens
+    if (allProducts.length > 0) {
+        setupProductSearch();
+    }
 }
 
 function closeRecordSaleModal() {
@@ -199,36 +294,49 @@ document.getElementById('productSelect').addEventListener('change', function() {
 // Record sale form handler
 document.getElementById('recordSaleForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const formData = new FormData(e.target);
-    const productInfo = formData.get('product').split('|');
-    
-    if (productInfo.length !== 2) {
-        showMessage('Please select a valid product', 'error');
+    const selectedProductId = formData.get('selectedProductId');
+
+    if (!selectedProductId) {
+        showMessage('Please select a product from the search suggestions', 'error');
         return;
     }
-    
-    const saleData = {
-        product_name: productInfo[0],
-        company_name: productInfo[1],
-        customer_name: formData.get('customer_name'),
-        quantity_sold: parseInt(formData.get('quantity_sold')),
-        unit_price: parseFloat(formData.get('unit_price')),
-        payment_status: formData.get('payment_status'),
-        payment_method: formData.get('payment_method') || null
-    };
-    
+
+    // Find the selected product to get its details
+    const selectedProduct = allProducts.find(p => p.id == selectedProductId);
+    if (!selectedProduct) {
+        showMessage('Selected product not found', 'error');
+        return;
+    }
+
+    // Check if admin has set unit price
+    if (!selectedProduct.unit_price || selectedProduct.unit_price <= 0) {
+        showMessage('Unit price not set by admin for this product. Please contact admin.', 'error');
+        return;
+    }
+
+    const quantity = parseInt(formData.get('quantity_sold'));
+
     // Validate stock availability
-    const selectedProduct = stockData.find(item => 
-        item.product_name === saleData.product_name && 
-        item.company_name === saleData.company_name
-    );
-    
-    if (!selectedProduct || selectedProduct.quantity < saleData.quantity_sold) {
+    if (selectedProduct.quantity < quantity) {
         showMessage('Insufficient stock available', 'error');
         return;
     }
-    
+
+    const saleData = {
+        product_name: selectedProduct.product_name,
+        company_name: selectedProduct.company_name,
+        customer_name: formData.get('customer_name'),
+        quantity_sold: quantity,
+        unit_price: selectedProduct.unit_price, // Use admin-set price
+        payment_status: formData.get('payment_status'),
+        payment_method: formData.get('payment_method') || null
+    };
+
+    // Calculate sale amount using admin-set price
+    saleData.sale_amount = quantity * selectedProduct.unit_price;
+
     try {
         const response = await axios.post(`${API_BASE}/sales`, saleData);
 

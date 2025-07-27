@@ -48,6 +48,7 @@ async function checkAuthentication() {
 async function loadDashboardData() {
     await Promise.all([
         loadDashboardStats(),
+        loadStockInventory(),
         loadUsers(),
         loadAnalytics()
     ]);
@@ -495,18 +496,193 @@ async function printReceiptById() {
     }
 }
 
-// Close modal when clicking outside
-window.onclick = function(event) {
-    const modal = document.getElementById('addUserModal');
-    if (event.target === modal) {
-        closeAddUserModal();
+// Load stock inventory
+async function loadStockInventory() {
+    try {
+        const response = await axios.get(`${API_BASE}/stock`);
+        const stockItems = response.data;
+
+        const stockList = document.getElementById('stockInventoryList');
+
+        if (stockItems.length === 0) {
+            stockList.innerHTML = '<p>No stock items found.</p>';
+            return;
+        }
+
+        const tableHTML = `
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Company</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total Value</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${stockItems.map(item => `
+                        <tr>
+                            <td>${item.product_name}</td>
+                            <td>${item.company_name}</td>
+                            <td>${item.quantity}</td>
+                            <td>Rs.${item.unit_price || 'Not Set'}</td>
+                            <td>Rs.${item.unit_price ? (item.quantity * item.unit_price).toFixed(2) : 'N/A'}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" onclick="editStock(${item.id})">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteStock(${item.id})">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+
+        stockList.innerHTML = tableHTML;
+
+    } catch (error) {
+        console.error('Error loading stock inventory:', error);
+        document.getElementById('stockInventoryList').innerHTML = '<p>Error loading stock inventory.</p>';
+    }
+}
+
+// Stock management functions
+function showAddStockModal() {
+    document.getElementById('addStockModal').style.display = 'block';
+}
+
+function closeAddStockModal() {
+    document.getElementById('addStockModal').style.display = 'none';
+    document.getElementById('addStockForm').reset();
+    document.getElementById('addStockMessage').innerHTML = '';
+}
+
+function showEditStockModal() {
+    document.getElementById('editStockModal').style.display = 'block';
+}
+
+function closeEditStockModal() {
+    document.getElementById('editStockModal').style.display = 'none';
+    document.getElementById('editStockForm').reset();
+    document.getElementById('editStockMessage').innerHTML = '';
+}
+
+// Add stock form submission
+document.getElementById('addStockForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+    const stockData = {
+        product_name: formData.get('productName'),
+        company_name: formData.get('companyName'),
+        quantity: parseInt(formData.get('quantity')),
+        unit_price: parseFloat(formData.get('unitPrice'))
+    };
+
+    try {
+        const response = await axios.post(`${API_BASE}/stock`, stockData);
+
+        document.getElementById('addStockMessage').innerHTML =
+            '<div class="success-message">Product added successfully!</div>';
+
+        setTimeout(() => {
+            closeAddStockModal();
+            loadStockInventory();
+        }, 2000);
+
+    } catch (error) {
+        const errorMessage = error.response?.data?.error || 'Failed to add product';
+        document.getElementById('addStockMessage').innerHTML =
+            `<div class="error-message">${errorMessage}</div>`;
+    }
+});
+
+// Edit stock form submission
+document.getElementById('editStockForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+    const stockId = formData.get('stockId');
+    const stockData = {
+        product_name: formData.get('productName'),
+        company_name: formData.get('companyName'),
+        quantity: parseInt(formData.get('quantity')),
+        unit_price: parseFloat(formData.get('unitPrice'))
+    };
+
+    try {
+        const response = await axios.put(`${API_BASE}/stock/${stockId}`, stockData);
+
+        document.getElementById('editStockMessage').innerHTML =
+            '<div class="success-message">Product updated successfully!</div>';
+
+        setTimeout(() => {
+            closeEditStockModal();
+            loadStockInventory();
+        }, 2000);
+
+    } catch (error) {
+        const errorMessage = error.response?.data?.error || 'Failed to update product';
+        document.getElementById('editStockMessage').innerHTML =
+            `<div class="error-message">${errorMessage}</div>`;
+    }
+});
+
+// Edit stock function
+async function editStock(stockId) {
+    try {
+        const response = await axios.get(`${API_BASE}/stock/${stockId}`);
+        const stock = response.data;
+
+        document.getElementById('editStockId').value = stock.id;
+        document.getElementById('editProductName').value = stock.product_name;
+        document.getElementById('editCompanyName').value = stock.company_name;
+        document.getElementById('editQuantity').value = stock.quantity;
+        document.getElementById('editUnitPrice').value = stock.unit_price || '';
+
+        showEditStockModal();
+
+    } catch (error) {
+        alert('Error loading stock item details');
+    }
+}
+
+// Delete stock function
+async function deleteStock(stockId) {
+    if (!confirm('Are you sure you want to delete this product?')) {
+        return;
+    }
+
+    try {
+        await axios.delete(`${API_BASE}/stock/${stockId}`);
+        alert('Product deleted successfully!');
+        loadStockInventory();
+
+    } catch (error) {
+        alert('Error deleting product');
     }
 }
 
 // Close modal when clicking outside
 window.onclick = function(event) {
-    const modal = document.getElementById('addUserModal');
-    if (event.target === modal) {
+    const addUserModal = document.getElementById('addUserModal');
+    const addStockModal = document.getElementById('addStockModal');
+    const editStockModal = document.getElementById('editStockModal');
+
+    if (event.target === addUserModal) {
         closeAddUserModal();
+    }
+
+    if (event.target === addStockModal) {
+        closeAddStockModal();
+    }
+
+    if (event.target === editStockModal) {
+        closeEditStockModal();
     }
 }

@@ -276,6 +276,17 @@
             <div class="loading">Loading dashboard statistics...</div>
         </div>
 
+        <!-- Stock Inventory Management -->
+        <div class="user-management">
+            <h2><i class="fas fa-boxes"></i> Stock Inventory Management</h2>
+            <button class="add-user-btn" onclick="showAddStockModal()">
+                <i class="fas fa-plus"></i> Add New Product
+            </button>
+            <div id="stockInventoryList">
+                <div class="loading">Loading stock inventory...</div>
+            </div>
+        </div>
+
         <!-- User Management -->
         <div class="user-management">
             <h2><i class="fas fa-users"></i> User Management</h2>
@@ -365,6 +376,94 @@
                     </button>
                     <p>Weekly sales report grouped by dates</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Stock Modal -->
+    <div id="addStockModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-plus"></i> Add New Product</h2>
+                <span class="close" onclick="closeAddStockModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="addStockForm">
+                    <div class="form-group">
+                        <label for="productName">Product Name:</label>
+                        <input type="text" id="productName" name="productName" required placeholder="e.g., Urea, Wheat Seeds">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="companyName">Company Name:</label>
+                        <input type="text" id="companyName" name="companyName" required placeholder="e.g., Nagarjuna, Gromor">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quantity">Initial Quantity:</label>
+                        <input type="number" id="quantity" name="quantity" required min="0" placeholder="e.g., 100">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="unitPrice">Unit Price (Rs.):</label>
+                        <input type="number" id="unitPrice" name="unitPrice" required min="0" step="0.01" placeholder="e.g., 1000.00">
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Add Product
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="closeAddStockModal()">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </form>
+                <div id="addStockMessage"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Stock Modal -->
+    <div id="editStockModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit"></i> Edit Product</h2>
+                <span class="close" onclick="closeEditStockModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editStockForm">
+                    <input type="hidden" id="editStockId" name="stockId">
+
+                    <div class="form-group">
+                        <label for="editProductName">Product Name:</label>
+                        <input type="text" id="editProductName" name="productName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editCompanyName">Company Name:</label>
+                        <input type="text" id="editCompanyName" name="companyName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editQuantity">Quantity:</label>
+                        <input type="number" id="editQuantity" name="quantity" required min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editUnitPrice">Unit Price (Rs.):</label>
+                        <input type="number" id="editUnitPrice" name="unitPrice" required min="0" step="0.01">
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Update Product
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="closeEditStockModal()">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </form>
+                <div id="editStockMessage"></div>
             </div>
         </div>
     </div>
