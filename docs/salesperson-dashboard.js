@@ -365,12 +365,20 @@ document.getElementById('recordSaleForm').addEventListener('submit', async (e) =
         lastSaleId = response.data.sale_id;
         console.log('Sale ID stored:', lastSaleId);
 
-        // Show success modal with sale details
-        showSaleSuccessModal(response.data);
-
-        // Close record sale modal and reload data
+        // Close record sale modal FIRST
         closeRecordSaleModal();
+
+        // Show success modal with sale details AFTER closing the record modal
+        setTimeout(() => {
+            console.log('About to show success modal...');
+            showSaleSuccessModal(response.data);
+        }, 100);
+
+        // Reload data
         loadDashboardData(); // Reload to update stock alerts
+
+        // Show success message
+        showMessage(`Sale recorded successfully! Sale ID: ${response.data.sale_id}`, 'success');
 
     } catch (error) {
         console.error('Sale submission error:', error);
@@ -496,6 +504,54 @@ function showSaleSuccessModal(saleData) {
 
 function closeSaleSuccessModal() {
     document.getElementById('saleSuccessModal').style.display = 'none';
+}
+
+// Test function to manually trigger success modal
+function testSuccessModal() {
+    const testData = {
+        sale_id: 999,
+        customer_name: "Test Customer",
+        product_name: "Test Product",
+        company_name: "Test Company",
+        quantity_sold: 10,
+        unit_price: 100,
+        sale_amount: 1000,
+        payment_status: "paid",
+        payment_method: "cash"
+    };
+
+    console.log('Testing success modal with data:', testData);
+    showSaleSuccessModal(testData);
+}
+
+// Fix the function name for the Record Sale button
+function showRecordSale() {
+    showRecordSaleModal();
+}
+
+// Show record sale modal
+function showRecordSaleModal() {
+    console.log('Opening record sale modal...');
+    document.getElementById('recordSaleModal').style.display = 'block';
+    loadProducts(); // Load products for search
+}
+
+// Close record sale modal
+function closeRecordSaleModal() {
+    console.log('Closing record sale modal...');
+    document.getElementById('recordSaleModal').style.display = 'none';
+    document.getElementById('recordSaleForm').reset();
+    document.getElementById('productSuggestions').style.display = 'none';
+    document.getElementById('selectedProductId').value = '';
+}
+
+// Show receipt options (for the Download Receipt button)
+function showReceiptOptions() {
+    const saleId = prompt('Enter Sale ID to download receipt:');
+    if (saleId) {
+        lastSaleId = saleId;
+        downloadReceipt();
+    }
 }
 
 // Download receipt
