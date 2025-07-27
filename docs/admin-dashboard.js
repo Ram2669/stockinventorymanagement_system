@@ -370,41 +370,18 @@ document.getElementById('addUserForm').addEventListener('submit', async (e) => {
     }
 });
 
-async function logout() {
-    console.log('Logout function called'); // Debug log
+function logout() {
+    console.log('Logout function called');
 
-    try {
-        const sessionToken = localStorage.getItem('session_token');
-        console.log('Session token:', sessionToken); // Debug log
+    // Clear all session data immediately
+    localStorage.removeItem('session_token');
+    localStorage.removeItem('user_data');
+    sessionStorage.clear();
 
-        if (sessionToken) {
-            await axios.post(`${API_BASE}/auth/logout`, { session_token: sessionToken });
-            console.log('Logout API call successful'); // Debug log
-        }
-    } catch (error) {
-        console.error('Logout error:', error);
-    } finally {
-        console.log('Clearing session data'); // Debug log
+    console.log('Session data cleared, redirecting...');
 
-        // Clear all session data
-        localStorage.removeItem('session_token');
-        localStorage.removeItem('user_data');
-        sessionStorage.clear();
-
-        // Clear browser cache and prevent back button access
-        if (window.history && window.history.pushState) {
-            window.history.pushState(null, null, 'login.html');
-            window.history.pushState(null, null, 'login.html');
-            window.onpopstate = function() {
-                window.history.go(1);
-            };
-        }
-
-        console.log('Redirecting to login'); // Debug log
-
-        // Redirect to login
-        window.location.replace('login.html');
-    }
+    // Simple redirect
+    window.location.href = 'login.html';
 }
 
 // Download weekly report by customer

@@ -125,9 +125,27 @@ function closeRecordSaleModal() {
 
 function showStockAlerts() {
     // Scroll to stock alerts section
-    document.querySelector('.alerts-section').scrollIntoView({ 
-        behavior: 'smooth' 
+    document.querySelector('.alerts-section').scrollIntoView({
+        behavior: 'smooth'
     });
+}
+
+function showReceiptOptions() {
+    if (!lastSaleId) {
+        alert('No recent sale found. Please record a sale first to generate a receipt.');
+        return;
+    }
+
+    // Show the sale success modal with receipt options
+    document.getElementById('saleDetails').innerHTML = `
+        <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+            <h4 style="color: #2e7d32; margin: 0 0 10px 0;">Receipt Options</h4>
+            <p style="margin: 0;">Receipt for Sale ID: ${lastSaleId}</p>
+            <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #666;">Choose download or print option below</p>
+        </div>
+    `;
+
+    document.getElementById('saleSuccessModal').style.display = 'block';
 }
 
 // Calculate total amount when quantity or unit price changes
@@ -231,56 +249,36 @@ function showMessage(message, type) {
     }, 5000);
 }
 
-async function logout() {
-    console.log('Logout function called'); // Debug log
+function logout() {
+    console.log('Logout function called');
 
-    try {
-        const sessionToken = localStorage.getItem('session_token');
-        console.log('Session token:', sessionToken); // Debug log
+    // Clear all session data immediately
+    localStorage.removeItem('session_token');
+    localStorage.removeItem('user_data');
+    sessionStorage.clear();
 
-        if (sessionToken) {
-            await axios.post(`${API_BASE}/auth/logout`, { session_token: sessionToken });
-            console.log('Logout API call successful'); // Debug log
-        }
-    } catch (error) {
-        console.error('Logout error:', error);
-    } finally {
-        console.log('Clearing session data'); // Debug log
+    console.log('Session data cleared, redirecting...');
 
-        // Clear all session data
-        localStorage.removeItem('session_token');
-        localStorage.removeItem('user_data');
-        sessionStorage.clear();
-
-        // Clear browser cache and prevent back button access
-        if (window.history && window.history.pushState) {
-            window.history.pushState(null, null, 'login.html');
-            window.history.pushState(null, null, 'login.html');
-            window.onpopstate = function() {
-                window.history.go(1);
-            };
-        }
-
-        console.log('Redirecting to login'); // Debug log
-
-        // Redirect to login
-        window.location.replace('login.html');
-    }
+    // Simple redirect
+    window.location.href = 'login.html';
 }
 
 // Show sale success modal
 function showSaleSuccessModal(saleData) {
     const saleDetails = document.getElementById('saleDetails');
     saleDetails.innerHTML = `
-        <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-            <h4 style="color: #2e7d32; margin: 0 0 10px 0;">Sale Details:</h4>
-            <p><strong>Customer:</strong> ${saleData.customer_name}</p>
-            <p><strong>Product:</strong> ${saleData.product_name} (${saleData.company_name})</p>
-            <p><strong>Quantity:</strong> ${saleData.quantity_sold}</p>
-            <p><strong>Unit Price:</strong> Rs.${saleData.unit_price}</p>
-            <p><strong>Total Amount:</strong> Rs.${saleData.sale_amount}</p>
-            <p><strong>Payment Status:</strong> ${saleData.payment_status === 'paid' ? '✅ Paid' : '💰 Unpaid'}</p>
-            ${saleData.payment_method ? `<p><strong>Payment Method:</strong> ${saleData.payment_method.toUpperCase()}</p>` : ''}
+        <div style="background: #e8f5e8; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+            <h4 style="color: #2e7d32; margin: 0 0 15px 0; font-size: 1.3em;">✅ Sale Recorded Successfully!</h4>
+            <div style="background: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+                <p><strong>Customer:</strong> ${saleData.customer_name}</p>
+                <p><strong>Product:</strong> ${saleData.product_name} (${saleData.company_name})</p>
+                <p><strong>Quantity:</strong> ${saleData.quantity_sold}</p>
+                <p><strong>Unit Price:</strong> Rs.${saleData.unit_price}</p>
+                <p style="font-size: 1.2em; color: #2e7d32;"><strong>Total Amount: Rs.${saleData.sale_amount}</strong></p>
+                <p><strong>Payment Status:</strong> ${saleData.payment_status === 'paid' ? '✅ Paid' : '💰 Unpaid'}</p>
+                ${saleData.payment_method ? `<p><strong>Payment Method:</strong> ${saleData.payment_method.toUpperCase()}</p>` : ''}
+            </div>
+            <p style="color: #2e7d32; font-weight: bold; margin: 0;">📄 Download or Print Receipt Below</p>
         </div>
     `;
 

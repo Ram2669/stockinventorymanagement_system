@@ -205,7 +205,10 @@
             <i class="fas fa-sign-out-alt"></i> Logout
         </button>
         <h1><i class="fas fa-seedling"></i> SRI LAKSHMI ENTERPRISES</h1>
-        <p>Agricultural Products & Inventory Management <span style="float: right; font-size: 0.9em; opacity: 0.8;"><i class="fas fa-user-tie"></i> Salesperson Dashboard</span></p>
+        <p>Agricultural Products & Inventory Management System</p>
+        <div style="position: absolute; top: 70px; right: 20px; background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; font-size: 0.9em;">
+            <i class="fas fa-user-tie"></i> Salesperson Dashboard
+        </div>
     </div>
 
     <div class="container">
@@ -222,11 +225,17 @@
                 <h3>Record Sale</h3>
                 <p>Add new sales transactions</p>
             </div>
-            
+
             <div class="action-card" onclick="showStockAlerts()">
                 <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
                 <h3>Stock Alerts</h3>
                 <p>View low stock notifications</p>
+            </div>
+
+            <div class="action-card" onclick="showReceiptOptions()">
+                <div class="icon"><i class="fas fa-receipt"></i></div>
+                <h3>Download Receipt</h3>
+                <p>Get receipt for last sale</p>
             </div>
         </div>
 
@@ -320,14 +329,14 @@
                 </div>
                 <div class="modal-body">
                     <div id="saleDetails"></div>
-                    <div class="modal-actions">
-                        <button class="btn btn-primary" onclick="downloadReceipt()">
-                            <i class="fas fa-download"></i> Download Receipt
+                    <div class="modal-actions" style="display: flex; gap: 10px; justify-content: center;">
+                        <button class="btn btn-primary" onclick="downloadReceipt()" style="flex: 1; font-size: 16px; padding: 15px;">
+                            <i class="fas fa-download"></i> Download Receipt PDF
                         </button>
-                        <button class="btn btn-success" onclick="printReceipt()">
+                        <button class="btn btn-success" onclick="printReceipt()" style="flex: 1; font-size: 16px; padding: 15px;">
                             <i class="fas fa-print"></i> Print Receipt
                         </button>
-                        <button class="btn btn-secondary" onclick="closeSaleSuccessModal()">
+                        <button class="btn btn-secondary" onclick="closeSaleSuccessModal()" style="flex: 0.5;">
                             <i class="fas fa-times"></i> Close
                         </button>
                     </div>
