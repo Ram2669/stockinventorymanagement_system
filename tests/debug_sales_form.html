@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Debug Sales Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .debug-log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .suggestions-dropdown {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 100%;
+            z-index: 1000;
+            display: none;
+        }
+        .suggestion-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        .suggestion-item:hover {
+            background: #f8f9fa;
+        }
+        .form-group {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Debug Sales Form</h1>
+        <p>Simplified version to test sales recording functionality</p>
+        
+        <form id="recordSaleForm">
+            <div class="form-group">
+                <label for="productSearch">Product Search:</label>
+                <input type="text" id="productSearch" name="productSearch" required
+                       placeholder="Type to search products..." autocomplete="off">
+                <div id="productSuggestions" class="suggestions-dropdown"></div>
+                <input type="hidden" id="selectedProductId" name="selectedProductId">
+            </div>
+            
+            <div class="form-group">
+                <label for="customer_name">Customer Name:</label>
+                <input type="text" id="customer_name" name="customer_name" required
+                       placeholder="Enter customer name" value="DEBUG_TEST_CUSTOMER">
+            </div>
+            
+            <div class="form-group">
+                <label for="quantity_sold">Quantity:</label>
+                <input type="number" id="quantity_sold" name="quantity_sold" required
+                       min="1" value="1" placeholder="Enter quantity">
+            </div>
+            
+            <div class="form-group">
+                <label for="payment_status">Payment Status:</label>
+                <select id="payment_status" name="payment_status" required>
+                    <option value="paid">Paid</option>
+                    <option value="unpaid">Unpaid</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="payment_method">Payment Method:</label>
+                <select id="payment_method" name="payment_method">
+                    <option value="cash">Cash</option>
+                    <option value="card">Card</option>
+                    <option value="upi">UPI</option>
+                </select>
+            </div>
+            
+            <button type="submit">🚀 Record Sale</button>
+            <button type="button" onclick="clearDebugLog()">🗑️ Clear Log</button>
+            <button type="button" onclick="loadProducts()">🔄 Reload Products</button>
+        </form>
+        
+        <div class="debug-log" id="debugLog">
+            <strong>Debug Log:</strong><br>
+        </div>
+    </div>
+
+    <!-- Include required libraries -->
+    <script src="../docs/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        // Debug logging
+        function debugLog(message) {
+            const log = document.getElementById('debugLog');
+            const timestamp = new Date().toLocaleTimeString();
+            log.innerHTML += `[${timestamp}] ${message}<br>`;
+            log.scrollTop = log.scrollHeight;
+            console.log(`[DEBUG] ${message}`);
+        }
+
+        function clearDebugLog() {
+            document.getElementById('debugLog').innerHTML = '<strong>Debug Log:</strong><br>';
+        }
+
+        // Global variables
+        let allProducts = [];
+
+        // Load products
+        async function loadProducts() {
+            try {
+                debugLog('🔄 Loading products from API...');
+                const response = await axios.get(`${API_BASE}/stock`);
+                allProducts = response.data;
+                debugLog(`✅ Loaded ${allProducts.length} products`);
+                
+                // Show available products
+                const availableProducts = allProducts.filter(p => p.quantity > 0);
+                debugLog(`📦 ${availableProducts.length} products have stock > 0`);
+                
+                availableProducts.forEach(p => {
+                    debugLog(`   - ${p.product_name} (${p.company_name}): Qty=${p.quantity}, Price=Rs.${p.unit_price || 0}`);
+                });
+                
+                setupProductSearch();
+                
+            } catch (error) {
+                debugLog(`❌ Failed to load products: ${error.message}`);
+                console.error('Product loading error:', error);
+            }
+        }
+
+        // Setup product search
+        function setupProductSearch() {
+            const searchInput = document.getElementById('productSearch');
+            const suggestionsDiv = document.getElementById('productSuggestions');
+            const selectedProductIdInput = document.getElementById('selectedProductId');
+
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase().trim();
+                debugLog(`🔍 Searching for: "${query}"`);
+                
+                if (query.length < 2) {
+                    suggestionsDiv.style.display = 'none';
+                    return;
+                }
+
+                const matches = allProducts.filter(product => 
+                    product.quantity > 0 && (
+                        product.product_name.toLowerCase().includes(query) ||
+                        product.company_name.toLowerCase().includes(query)
+                    )
+                );
+
+                debugLog(`📋 Found ${matches.length} matching products`);
+
+                if (matches.length === 0) {
+                    suggestionsDiv.style.display = 'none';
+                    return;
+                }
+
+                suggestionsDiv.innerHTML = '';
+                matches.forEach(product => {
+                    const div = document.createElement('div');
+                    div.className = 'suggestion-item';
+                    div.innerHTML = `
+                        <strong>${product.product_name}</strong> (${product.company_name})<br>
+                        <small>Available: ${product.quantity} | Price: Rs.${product.unit_price || 0}</small>
+                    `;
+                    
+                    div.addEventListener('click', function() {
+                        searchInput.value = `${product.product_name} (${product.company_name})`;
+                        selectedProductIdInput.value = product.id;
+                        suggestionsDiv.style.display = 'none';
+                        debugLog(`✅ Selected product: ${product.product_name} (ID: ${product.id})`);
+                    });
+                    
+                    suggestionsDiv.appendChild(div);
+                });
+
+                suggestionsDiv.style.display = 'block';
+            });
+
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+                    suggestionsDiv.style.display = 'none';
+                }
+            });
+        }
+
+        // Form submission handler
+        document.getElementById('recordSaleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            debugLog('🚀 Form submitted - starting sale recording...');
+
+            try {
+                const formData = new FormData(e.target);
+                const selectedProductId = formData.get('selectedProductId');
+
+                debugLog(`📋 Form data: selectedProductId=${selectedProductId}`);
+
+                if (!selectedProductId) {
+                    debugLog('❌ No product selected');
+                    alert('Please select a product from the search suggestions');
+                    return;
+                }
+
+                // Find the selected product
+                const selectedProduct = allProducts.find(p => p.id == selectedProductId);
+                if (!selectedProduct) {
+                    debugLog('❌ Selected product not found in products array');
+                    alert('Selected product not found');
+                    return;
+                }
+
+                debugLog(`✅ Found selected product: ${selectedProduct.product_name}`);
+
+                const quantity = parseInt(formData.get('quantity_sold'));
+                debugLog(`📊 Quantity requested: ${quantity}, Available: ${selectedProduct.quantity}`);
+
+                // Check stock availability
+                if (selectedProduct.quantity < quantity) {
+                    debugLog('❌ Insufficient stock');
+                    alert(`Insufficient stock available. Available: ${selectedProduct.quantity}, Requested: ${quantity}`);
+                    return;
+                }
+
+                // Handle unit price
+                let unitPrice = selectedProduct.unit_price;
+                debugLog(`💰 Product unit price: Rs.${unitPrice || 0}`);
+
+                if (!unitPrice || unitPrice <= 0) {
+                    debugLog('⚠️ Zero unit price detected - showing confirmation dialog');
+                    
+                    const confirmSale = confirm(
+                        `⚠️ WARNING: Unit price not set by admin for this product.\n\n` +
+                        `Product: ${selectedProduct.product_name}\n` +
+                        `Current Price: Rs.${unitPrice || 0}\n\n` +
+                        `Do you want to proceed with this sale?`
+                    );
+                    
+                    if (!confirmSale) {
+                        debugLog('❌ Sale cancelled by user');
+                        return;
+                    }
+                    
+                    const customPrice = prompt(
+                        `Enter unit price for ${selectedProduct.product_name}:`,
+                        unitPrice || '0'
+                    );
+                    
+                    if (customPrice === null) {
+                        debugLog('❌ Sale cancelled - no price entered');
+                        return;
+                    }
+                    
+                    const parsedPrice = parseFloat(customPrice);
+                    if (isNaN(parsedPrice) || parsedPrice < 0) {
+                        debugLog('❌ Invalid price entered');
+                        alert('Invalid price entered. Sale cancelled.');
+                        return;
+                    }
+                    
+                    unitPrice = parsedPrice;
+                    debugLog(`💰 Custom price set: Rs.${unitPrice}`);
+                }
+
+                // Prepare sale data
+                const saleData = {
+                    product_name: selectedProduct.product_name,
+                    company_name: selectedProduct.company_name,
+                    customer_name: formData.get('customer_name'),
+                    quantity_sold: quantity,
+                    unit_price: unitPrice,
+                    payment_status: formData.get('payment_status'),
+                    payment_method: formData.get('payment_method') || 'cash'
+                };
+
+                debugLog(`📝 Prepared sale data: ${JSON.stringify(saleData)}`);
+
+                // Submit sale
+                debugLog('🚀 Submitting sale to API...');
+                const response = await axios.post(`${API_BASE}/sales`, saleData);
+
+                if (response.status === 201) {
+                    const result = response.data;
+                    debugLog(`✅ SALE RECORDED SUCCESSFULLY!`);
+                    debugLog(`📋 Sale ID: ${result.sale_id}`);
+                    debugLog(`💰 Sale Amount: Rs.${result.sale_amount}`);
+                    
+                    alert(`✅ SALE RECORDED SUCCESSFULLY!\nSale ID: ${result.sale_id}\nAmount: Rs.${result.sale_amount}`);
+                    
+                    // Reset form
+                    document.getElementById('recordSaleForm').reset();
+                    document.getElementById('selectedProductId').value = '';
+                    
+                    // Reload products to show updated stock
+                    setTimeout(() => {
+                        loadProducts();
+                    }, 1000);
+                    
+                } else {
+                    debugLog(`❌ Unexpected response status: ${response.status}`);
+                    alert(`Unexpected response: ${response.status}`);
+                }
+
+            } catch (error) {
+                debugLog(`❌ SALE RECORDING FAILED: ${error.message}`);
+                if (error.response) {
+                    debugLog(`📋 Server response: ${JSON.stringify(error.response.data)}`);
+                }
+                alert(`Sale recording failed: ${error.message}`);
+                console.error('Sale recording error:', error);
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            debugLog('🚀 Debug form initialized');
+            debugLog(`🔗 API_BASE: ${API_BASE}`);
+            debugLog(`📚 axios available: ${typeof axios !== 'undefined'}`);
+            
+            // Load products on startup
+            loadProducts();
+        });
+    </script>
+</body>
+</html>
