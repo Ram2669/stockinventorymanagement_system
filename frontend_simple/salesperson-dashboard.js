@@ -1,6 +1,7 @@
 // Global variables
 let currentUser = null;
 let stockData = [];
+let lastSaleId = null;
 
 // Check authentication on page load
 window.addEventListener('DOMContentLoaded', async () => {
@@ -205,15 +206,17 @@ document.getElementById('recordSaleForm').addEventListener('submit', async (e) =
     
     try {
         const response = await axios.post(`${API_BASE}/sales`, saleData);
-        
-        showMessage('Sale recorded successfully!', 'success');
-        
-        // Reset form and reload data
-        setTimeout(() => {
-            closeRecordSaleModal();
-            loadDashboardData(); // Reload to update stock alerts
-        }, 2000);
-        
+
+        // Store the sale ID for receipt generation
+        lastSaleId = response.data.sale_id;
+
+        // Show success modal with sale details
+        showSaleSuccessModal(response.data);
+
+        // Close record sale modal and reload data
+        closeRecordSaleModal();
+        loadDashboardData(); // Reload to update stock alerts
+
     } catch (error) {
         const errorMessage = error.response?.data?.error || 'Failed to record sale';
         showMessage(errorMessage, 'error');
@@ -229,14 +232,21 @@ function showMessage(message, type) {
 }
 
 async function logout() {
+    console.log('Logout function called'); // Debug log
+
     try {
         const sessionToken = localStorage.getItem('session_token');
+        console.log('Session token:', sessionToken); // Debug log
+
         if (sessionToken) {
             await axios.post(`${API_BASE}/auth/logout`, { session_token: sessionToken });
+            console.log('Logout API call successful'); // Debug log
         }
     } catch (error) {
         console.error('Logout error:', error);
     } finally {
+        console.log('Clearing session data'); // Debug log
+
         // Clear all session data
         localStorage.removeItem('session_token');
         localStorage.removeItem('user_data');
@@ -251,15 +261,143 @@ async function logout() {
             };
         }
 
+        console.log('Redirecting to login'); // Debug log
+
         // Redirect to login
         window.location.replace('login.html');
     }
 }
 
+// Show sale success modal
+function showSaleSuccessModal(saleData) {
+    const saleDetails = document.getElementById('saleDetails');
+    saleDetails.innerHTML = `
+        <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h4 style="color: #2e7d32; margin: 0 0 10px 0;">Sale Details:</h4>
+            <p><strong>Customer:</strong> ${saleData.customer_name}</p>
+            <p><strong>Product:</strong> ${saleData.product_name} (${saleData.company_name})</p>
+            <p><strong>Quantity:</strong> ${saleData.quantity_sold}</p>
+            <p><strong>Unit Price:</strong> Rs.${saleData.unit_price}</p>
+            <p><strong>Total Amount:</strong> Rs.${saleData.sale_amount}</p>
+            <p><strong>Payment Status:</strong> ${saleData.payment_status === 'paid' ? '✅ Paid' : '💰 Unpaid'}</p>
+            ${saleData.payment_method ? `<p><strong>Payment Method:</strong> ${saleData.payment_method.toUpperCase()}</p>` : ''}
+        </div>
+    `;
+
+    document.getElementById('saleSuccessModal').style.display = 'block';
+}
+
+function closeSaleSuccessModal() {
+    document.getElementById('saleSuccessModal').style.display = 'none';
+}
+
+// Download receipt
+async function downloadReceipt() {
+    if (!lastSaleId) {
+        alert('No sale ID available for receipt');
+        return;
+    }
+
+    try {
+        const response = await axios.get(`${API_BASE}/sales/${lastSaleId}/receipt`, {
+            responseType: 'blob'
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `receipt_${lastSaleId}_${new Date().toISOString().split('T')[0]}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
+        alert('Receipt downloaded successfully!');
+    } catch (error) {
+        console.error('Error downloading receipt:', error);
+        alert('Error downloading receipt');
+    }
+}
+
+// Print receipt
+async function printReceipt() {
+    if (!lastSaleId) {
+        alert('No sale ID available for receipt');
+        return;
+    }
+
+    try {
+        const response = await axios.get(`${API_BASE}/sales/${lastSaleId}/receipt`, {
+            responseType: 'blob'
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const printWindow = window.open(url);
+        printWindow.onload = function() {
+            printWindow.print();
+        };
+    } catch (error) {
+        console.error('Error printing receipt:', error);
+        alert('Error printing receipt');
+    }
+}
+
+// Download weekly report by customer
+async function downloadWeeklyReportByCustomer() {
+    try {
+        const response = await axios.get(`${API_BASE}/reports/weekly/customer`, {
+            responseType: 'blob'
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `weekly_report_by_customer_${new Date().toISOString().split('T')[0]}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
+        alert('Weekly report by customer downloaded successfully!');
+    } catch (error) {
+        console.error('Error downloading report:', error);
+        alert('Error downloading weekly report');
+    }
+}
+
+// Download weekly report by date
+async function downloadWeeklyReportByDate() {
+    try {
+        const response = await axios.get(`${API_BASE}/reports/weekly/date`, {
+            responseType: 'blob'
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `weekly_report_by_date_${new Date().toISOString().split('T')[0]}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
+        alert('Weekly report by date downloaded successfully!');
+    } catch (error) {
+        console.error('Error downloading report:', error);
+        alert('Error downloading weekly report');
+    }
+}
+
 // Close modal when clicking outside
 window.onclick = function(event) {
-    const modal = document.getElementById('recordSaleModal');
-    if (event.target === modal) {
+    const recordModal = document.getElementById('recordSaleModal');
+    const successModal = document.getElementById('saleSuccessModal');
+
+    if (event.target === recordModal) {
         closeRecordSaleModal();
+    }
+
+    if (event.target === successModal) {
+        closeSaleSuccessModal();
     }
 }

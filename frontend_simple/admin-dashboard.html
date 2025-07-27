@@ -263,8 +263,8 @@
         <button class="logout-btn" onclick="logout()">
             <i class="fas fa-sign-out-alt"></i> Logout
         </button>
-        <h1><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h1>
-        <p>SRI LAKSHMI ENTERPRISES - Complete Business Overview</p>
+        <h1><i class="fas fa-seedling"></i> SRI LAKSHMI ENTERPRISES</h1>
+        <p>Agricultural Products & Inventory Management <span style="float: right; font-size: 0.9em; opacity: 0.8;"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</span></p>
     </div>
 
     <div class="container">
@@ -322,6 +322,31 @@
                     <div id="stockAlerts">
                         <div class="loading">Loading stock alerts...</div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Reports Section -->
+        <div class="analytics-section">
+            <div class="analytics-header">
+                <h2><i class="fas fa-file-pdf"></i> Weekly Reports</h2>
+            </div>
+
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <h3><i class="fas fa-users"></i> Customer Reports</h3>
+                    <button class="btn btn-primary" onclick="downloadWeeklyReportByCustomer()" style="width: 100%; margin-bottom: 10px;">
+                        <i class="fas fa-download"></i> Download by Customer
+                    </button>
+                    <p>Weekly sales report grouped by customer names</p>
+                </div>
+
+                <div class="analytics-card">
+                    <h3><i class="fas fa-calendar"></i> Date Reports</h3>
+                    <button class="btn btn-primary" onclick="downloadWeeklyReportByDate()" style="width: 100%; margin-bottom: 10px;">
+                        <i class="fas fa-download"></i> Download by Date
+                    </button>
+                    <p>Weekly sales report grouped by dates</p>
                 </div>
             </div>
         </div>

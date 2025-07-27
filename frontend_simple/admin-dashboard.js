@@ -371,14 +371,21 @@ document.getElementById('addUserForm').addEventListener('submit', async (e) => {
 });
 
 async function logout() {
+    console.log('Logout function called'); // Debug log
+
     try {
         const sessionToken = localStorage.getItem('session_token');
+        console.log('Session token:', sessionToken); // Debug log
+
         if (sessionToken) {
             await axios.post(`${API_BASE}/auth/logout`, { session_token: sessionToken });
+            console.log('Logout API call successful'); // Debug log
         }
     } catch (error) {
         console.error('Logout error:', error);
     } finally {
+        console.log('Clearing session data'); // Debug log
+
         // Clear all session data
         localStorage.removeItem('session_token');
         localStorage.removeItem('user_data');
@@ -393,8 +400,56 @@ async function logout() {
             };
         }
 
+        console.log('Redirecting to login'); // Debug log
+
         // Redirect to login
         window.location.replace('login.html');
+    }
+}
+
+// Download weekly report by customer
+async function downloadWeeklyReportByCustomer() {
+    try {
+        const response = await axios.get(`${API_BASE}/reports/weekly/customer`, {
+            responseType: 'blob'
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `weekly_report_by_customer_${new Date().toISOString().split('T')[0]}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
+        alert('Weekly report by customer downloaded successfully!');
+    } catch (error) {
+        console.error('Error downloading report:', error);
+        alert('Error downloading weekly report');
+    }
+}
+
+// Download weekly report by date
+async function downloadWeeklyReportByDate() {
+    try {
+        const response = await axios.get(`${API_BASE}/reports/weekly/date`, {
+            responseType: 'blob'
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `weekly_report_by_date_${new Date().toISOString().split('T')[0]}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
+        alert('Weekly report by date downloaded successfully!');
+    } catch (error) {
+        console.error('Error downloading report:', error);
+        alert('Error downloading weekly report');
     }
 }
 
