@@ -497,6 +497,28 @@
         /* Daily Sales Styles */
         .sales-list {
             margin-top: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* Custom scrollbar for daily sales */
+        .sales-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sales-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .sales-list::-webkit-scrollbar-thumb {
+            background: #28a745;
+            border-radius: 4px;
+        }
+
+        .sales-list::-webkit-scrollbar-thumb:hover {
+            background: #218838;
         }
 
         .sales-list .alert-item {

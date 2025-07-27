@@ -101,8 +101,10 @@ async function loadStockAlerts() {
 // Load daily sales for salesperson
 async function loadDailySales() {
     try {
-        const response = await axios.get(`${API_BASE}/sales/daily`);
+        console.log('Loading daily sales...');
+        const response = await axios.get(`${API_BASE}/sales/daily?t=${Date.now()}`); // Add timestamp to prevent caching
         const data = response.data;
+        console.log('Daily sales loaded:', data.sales.length, 'sales today');
 
         // Update daily sales summary with action cards
         const summaryElement = document.getElementById('dailySalesSummary');
@@ -172,8 +174,10 @@ async function loadDailySales() {
 
 async function loadStockData() {
     try {
-        const response = await axios.get(`${API_BASE}/stock`);
+        console.log('Loading stock data...');
+        const response = await axios.get(`${API_BASE}/stock?t=${Date.now()}`); // Add timestamp to prevent caching
         stockData = response.data;
+        console.log('Stock data loaded:', stockData.length, 'items');
         
         // Populate product dropdown
         const productSelect = document.getElementById('productSelect');
@@ -197,8 +201,10 @@ async function loadStockData() {
 // Load products for search functionality
 async function loadProducts() {
     try {
-        const response = await axios.get(`${API_BASE}/stock`);
+        console.log('Loading products for search...');
+        const response = await axios.get(`${API_BASE}/stock?t=${Date.now()}`); // Add timestamp to prevent caching
         allProducts = response.data;
+        console.log('Products loaded for search:', allProducts.length, 'products');
         setupProductSearch();
 
     } catch (error) {
@@ -445,10 +451,10 @@ document.getElementById('recordSaleForm').addEventListener('submit', async (e) =
         console.log('About to show success modal...');
         showSaleSuccessModal(response.data);
 
-        // Reload data after modal is shown
-        setTimeout(() => {
-            loadDashboardData(); // Reload to update stock alerts
-        }, 1000);
+        // Immediately reload data to update stock and daily sales
+        console.log('Reloading dashboard data immediately...');
+        await loadDashboardData(); // Reload to update stock alerts and daily sales
+        console.log('Dashboard data reloaded successfully');
 
     } catch (error) {
         console.error('Sale submission error:', error);

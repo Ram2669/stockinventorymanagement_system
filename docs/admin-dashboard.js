@@ -154,8 +154,10 @@ async function loadUsers() {
 // Load daily sales
 async function loadDailySales() {
     try {
-        const response = await axios.get(`${API_BASE}/sales/daily`);
+        console.log('Loading daily sales...');
+        const response = await axios.get(`${API_BASE}/sales/daily?t=${Date.now()}`); // Add timestamp to prevent caching
         const data = response.data;
+        console.log('Daily sales loaded:', data.sales.length, 'sales today');
 
         // Update daily sales summary
         const summaryElement = document.getElementById('dailySalesSummary');

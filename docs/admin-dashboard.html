@@ -260,6 +260,28 @@
         /* Daily Sales Styles */
         .sales-table {
             overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* Custom scrollbar for daily sales table */
+        .sales-table::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .sales-table::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .sales-table::-webkit-scrollbar-thumb {
+            background: #28a745;
+            border-radius: 4px;
+        }
+
+        .sales-table::-webkit-scrollbar-thumb:hover {
+            background: #218838;
         }
 
         .sales-table table {
