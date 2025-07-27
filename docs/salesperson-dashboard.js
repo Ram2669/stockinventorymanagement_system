@@ -237,9 +237,22 @@ async function logout() {
     } catch (error) {
         console.error('Logout error:', error);
     } finally {
+        // Clear all session data
         localStorage.removeItem('session_token');
         localStorage.removeItem('user_data');
-        window.location.href = 'login.html';
+        sessionStorage.clear();
+
+        // Clear browser cache and prevent back button access
+        if (window.history && window.history.pushState) {
+            window.history.pushState(null, null, 'login.html');
+            window.history.pushState(null, null, 'login.html');
+            window.onpopstate = function() {
+                window.history.go(1);
+            };
+        }
+
+        // Redirect to login
+        window.location.replace('login.html');
     }
 }
 

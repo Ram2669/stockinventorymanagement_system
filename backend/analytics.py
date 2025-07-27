@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models import db, Sale, Stock
 from datetime import datetime, timedelta
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, case
 
 analytics_bp = Blueprint('analytics', __name__)
 
@@ -169,8 +169,8 @@ def get_customer_analysis():
         # Customer payment behavior
         customer_payments = db.session.query(
             Sale.customer_name,
-            func.sum(func.case([(Sale.payment_status == 'paid', Sale.sale_amount)], else_=0)).label('paid_amount'),
-            func.sum(func.case([(Sale.payment_status == 'unpaid', Sale.sale_amount)], else_=0)).label('unpaid_amount'),
+            func.sum(case((Sale.payment_status == 'paid', Sale.sale_amount), else_=0)).label('paid_amount'),
+            func.sum(case((Sale.payment_status == 'unpaid', Sale.sale_amount), else_=0)).label('unpaid_amount'),
             func.sum(Sale.sale_amount).label('total_amount')
         ).filter(
             Sale.sale_date >= start_date

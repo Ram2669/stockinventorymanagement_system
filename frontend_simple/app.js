@@ -13,6 +13,24 @@ let unpaidSales = [];
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', async function() {
+    // Prevent caching and back button access after logout
+    window.history.forward();
+
+    // Check if user is coming back after logout
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+            // Page was loaded from cache (back button), check authentication again
+            checkAuthentication();
+        }
+    });
+
+    // Prevent back button after logout
+    window.addEventListener('beforeunload', function() {
+        if (!localStorage.getItem('session_token')) {
+            window.history.forward();
+        }
+    });
+
     await checkAuthentication();
     loadData();
     setupEventListeners();
@@ -72,9 +90,22 @@ async function logout() {
     } catch (error) {
         console.error('Logout error:', error);
     } finally {
+        // Clear all session data
         localStorage.removeItem('session_token');
         localStorage.removeItem('user_data');
-        window.location.href = 'login.html';
+        sessionStorage.clear();
+
+        // Clear browser cache and prevent back button access
+        if (window.history && window.history.pushState) {
+            window.history.pushState(null, null, 'login.html');
+            window.history.pushState(null, null, 'login.html');
+            window.onpopstate = function() {
+                window.history.go(1);
+            };
+        }
+
+        // Redirect to login
+        window.location.replace('login.html');
     }
 }
 
